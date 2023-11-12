@@ -2,11 +2,12 @@ package com.example.zhidao.service.impl;
 
 import com.example.zhidao.dao.UserRepository;
 import com.example.zhidao.pojo.entity.User;
+import com.example.zhidao.pojo.vo.common.BizException;
+import com.example.zhidao.pojo.vo.common.ExceptionEnum;
 import com.example.zhidao.service.UserService;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -14,19 +15,48 @@ public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
 
     @Override
-    public boolean login(String username, String password) {
-        String md5Hex = DigestUtils.md5Hex(password);
+    public User login(String username, String password) {
+        User user = userRepository.findUserByUsernameAndPassword(username, DigestUtils.md5Hex(password));
+        if (user != null) {
+            return user;
+        } else {
+            throw new BizException(ExceptionEnum.INVALID_CREDENTIAL);
+
+        }
+    }
+
+    @Override
+    public User register(String username, String password, String nickName, String profileImagePath) {
         User user = userRepository.findUserByUsername(username);
-        return user != null && user.getPassword().equals(md5Hex);
+        if (user != null) {
+            throw new BizException(ExceptionEnum.USERNAME_EXIST);
+        } else {
+            return userRepository.save(new User(null, username, DigestUtils.md5Hex(password)
+                    , nickName, profileImagePath));
+        }
     }
 
     @Override
-    public boolean register(String username, String password, String nickName, MultipartFile file) {
-        return false;
+    public User editInfo(String username, String password, String nickName, String profileImagePath) {
+        User user = userRepository.findUserByUsernameAndPassword(username, DigestUtils.md5Hex(password));
+        if (user != null) {
+            user.setNickName(nickName);
+            user.setProfileImagePath(profileImagePath);
+            return userRepository.save(user);
+        } else {
+            throw new BizException(ExceptionEnum.INVALID_CREDENTIAL);
+        }
     }
 
     @Override
-    public boolean editInfo(String username, String password, String nickName, MultipartFile file) {
-        return false;
+    public User modifyPassword(String username, String oldPassword, String newPassword) {
+        User user = userRepository.findUserByUsernameAndPassword(username, DigestUtils.md5Hex(oldPassword));
+        if (user != null) {
+            user.setPassword(DigestUtils.md5Hex(newPassword));
+            return userRepository.save(user);
+        } else {
+            throw new BizException(ExceptionEnum.INVALID_CREDENTIAL);
+        }
     }
+
 }

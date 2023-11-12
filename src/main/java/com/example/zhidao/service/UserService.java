@@ -1,12 +1,13 @@
 package com.example.zhidao.service;
 
 import com.example.zhidao.pojo.entity.User;
-import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService {
-    boolean login(String username, String password);
+    User login(String username, String password);
 
-    boolean register(String username, String password, String nickName, MultipartFile file);
+    User register(String username, String password, String nickName, String profileImagePath);
 
-    boolean editInfo(String username, String password, String nickName, MultipartFile file);
+    User editInfo(String username, String password, String nickName, String profileImagePath);
+
+    User modifyPassword(String username, String oldPassword, String newPassword);
 }

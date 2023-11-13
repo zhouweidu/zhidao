@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
         for (ObjectError allError : allErrors) {
             msgList.add(allError.getDefaultMessage());
         }
-        log.warn(msgList.toString());
+        log.error(msgList.toString());
         return ResultResponse.error(msgList.toString());
     }
 
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
         for (ObjectError allError : allErrors) {
             msgList.add(allError.getDefaultMessage());
         }
-        log.warn(msgList.toString());
+        log.error(msgList.toString());
         return ResultResponse.error(msgList.toString());
     }
 
@@ -78,7 +78,7 @@ public class GlobalExceptionHandler {
             ConstraintViolation<?> cvl = iterator.next();
             msgList.add(cvl.getMessageTemplate());
         }
-        log.warn(msgList.toString());
+        log.error(msgList.toString());
         return ResultResponse.error(msgList.toString());
     }
 
@@ -91,7 +91,7 @@ public class GlobalExceptionHandler {
     @ResponseBody
     @ExceptionHandler({BizException.class})
     public ResultResponse bizExceptionHandler(BizException e) {
-        log.warn(e.toString());
+        log.error(e.toString());
         return ResultResponse.error(e.getErrorCode(), e.getErrorMsg());
     }
 

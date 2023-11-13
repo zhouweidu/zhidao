@@ -32,7 +32,7 @@ public class UserServiceImpl implements UserService {
             throw new BizException(ExceptionEnum.USERNAME_EXIST);
         } else {
             return userRepository.save(new User(null, username, DigestUtils.md5Hex(password)
-                    , nickName, profileImagePath));
+                    , nickName, profileImagePath,null,null));
         }
     }
 

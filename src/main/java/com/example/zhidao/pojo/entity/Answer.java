@@ -5,8 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Data
@@ -22,5 +25,11 @@ public class Answer {
     private Long userId;
     @Column(length = 5000)
     private String answerContent;
-    private Long likedNumber;
+    private Long likedNumber;//点赞数
+    private Long commentNumber;//评论数
+    private Long collectNumber;//收藏数
+    @CreationTimestamp
+    private Date createdAt;
+    @UpdateTimestamp
+    private Date updatedAt;
 }

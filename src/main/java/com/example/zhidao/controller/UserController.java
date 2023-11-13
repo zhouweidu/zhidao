@@ -1,10 +1,12 @@
 package com.example.zhidao.controller;
 
+import com.example.zhidao.mapper.UserMapper;
 import com.example.zhidao.pojo.entity.User;
 import com.example.zhidao.pojo.vo.common.ResultResponse;
 import com.example.zhidao.pojo.vo.user.LoginRequest;
 import com.example.zhidao.pojo.vo.user.ModifyPasswordRequest;
 import com.example.zhidao.pojo.vo.user.RegisterOrEditInfoRequest;
+import com.example.zhidao.pojo.vo.user.UserVO;
 import com.example.zhidao.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +22,7 @@ public class UserController {
     @PostMapping("/user/login")
     public ResultResponse login(@Valid @RequestBody LoginRequest loginRequest) {
         User user = userService.login(loginRequest.getUsername(), loginRequest.getPassword());
-        return ResultResponse.success(user);
+        return ResultResponse.success(UserMapper.INSTANCT.entity2VO(user));
     }
 
     @PostMapping("/user")

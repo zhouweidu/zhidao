@@ -6,7 +6,6 @@ import com.example.zhidao.pojo.vo.common.ResultResponse;
 import com.example.zhidao.pojo.vo.user.LoginRequest;
 import com.example.zhidao.pojo.vo.user.ModifyPasswordRequest;
 import com.example.zhidao.pojo.vo.user.RegisterOrEditInfoRequest;
-import com.example.zhidao.pojo.vo.user.UserVO;
 import com.example.zhidao.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

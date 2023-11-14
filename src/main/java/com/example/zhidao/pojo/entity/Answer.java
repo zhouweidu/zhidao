@@ -25,9 +25,9 @@ public class Answer {
     private Long userId;
     @Column(length = 5000)
     private String answerContent;
-    private Long likedNumber;//点赞数
-    private Long commentNumber;//评论数
-    private Long collectNumber;//收藏数
+    private Integer likedNumber;//点赞数
+    private Integer commentNumber;//评论数
+    private Integer collectNumber;//收藏数
     @CreationTimestamp
     private Date createdAt;
     @UpdateTimestamp

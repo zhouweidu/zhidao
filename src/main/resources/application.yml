@@ -19,3 +19,6 @@ server:
 xf-rest:
   hostUrl: http://localhost:8080/xf
   sendQuestionUri: /sendQuestion
+
+xf:
+  aiId: 0

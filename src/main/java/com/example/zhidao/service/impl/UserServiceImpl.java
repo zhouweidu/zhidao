@@ -31,8 +31,8 @@ public class UserServiceImpl implements UserService {
         if (user != null) {
             throw new BizException(ExceptionEnum.USERNAME_EXIST);
         } else {
-            return userRepository.save(new User(null, username, DigestUtils.md5Hex(password)
-                    , nickName, profileImagePath,null,null));
+            return userRepository.save(User.builder().username(username).password(DigestUtils.md5Hex(password))
+                    .nickName(nickName).profileImagePath(profileImagePath).build());
         }
     }
 

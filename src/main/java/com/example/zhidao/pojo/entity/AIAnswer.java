@@ -21,13 +21,13 @@ public class AIAnswer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long aiAnswerId;
-    private Long aiId;
+    private Integer aiId;
     private Long issueId;
     @Column(length = 4000)
     private String aiAnswerContent;
-    private Long likedNumber;//点赞数
-    private Long commentNumber;//评论数
-    private Long collectNumber;//收藏数
+    private Integer likedNumber;//点赞数
+    private Integer commentNumber;//评论数
+    private Integer collectNumber;//收藏数
     @CreationTimestamp
     private Date createdAt;
     @UpdateTimestamp

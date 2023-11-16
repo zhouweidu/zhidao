@@ -51,7 +51,7 @@ public class IssueServiceImpl implements IssueService {
     public List<Issue> findIssuePages(Integer page, Integer pageSize) {
         PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC,
                 "concernedNumber"));
-        Page<Issue> issuePages = issueRepository.findBy(pageRequest);
+        Page<Issue> issuePages = issueRepository.findAll(pageRequest);
         ArrayList<Issue> issues = new ArrayList<>();
         for (Issue issuePage : issuePages) {
             issues.add(issuePage);

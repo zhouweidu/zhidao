@@ -5,6 +5,10 @@ public enum ExceptionEnum implements BaseErrorInfoInterface{
     SUCCESS("2000", "成功!"),
     INVALID_CREDENTIAL("4000", "用户名或密码错误"),
     USERNAME_EXIST("4001", "用户名已存在"),
+    ISSUE_NOT_EXIST("4002", "问题不存在"),
+    ANSWER_NOT_EXIST("4003", "回答不存在"),
+    COMMENT_NOT_EXIST("4004", "评论不存在"),
+    REMOVE_OTHERS_COMMENT("4005", "不能删除别人的评论"),
 
 
 

@@ -27,7 +27,7 @@ public class Comment {
     private Long userId;
     private Long answerId;
     private String content;
-    private Long likedNumber;
+    private Integer likedNumber;
     @CreationTimestamp
     private Date createdAt;
     @UpdateTimestamp

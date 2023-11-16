@@ -21,8 +21,8 @@ public class AnswerController {
     private AnswerService answerService;
 
     @GetMapping("/answer/page")
-    public ResultResponse findAnswerByIssueId(@Valid FindAnswerPagesRequest findAnswerPagesRequest) {
-        List<Answer> answers = answerService.findAnswerByIssueId(findAnswerPagesRequest.getIssueId(),
+    public ResultResponse findAnswerPages(@Valid FindAnswerPagesRequest findAnswerPagesRequest) {
+        List<Answer> answers = answerService.findAnswerPages(findAnswerPagesRequest.getIssueId(),
                 findAnswerPagesRequest.getPage(), findAnswerPagesRequest.getPageSize());
         ArrayList<AnswerVO> answerVOList = new ArrayList<>();
         for (Answer answer : answers) {
@@ -34,7 +34,19 @@ public class AnswerController {
     @PostMapping("/answer")
     public ResultResponse createAnswer(@Valid @RequestBody CreateAnswerRequest createAnswerRequest) {
         Answer answer = answerService.createAnswer(createAnswerRequest.getUsername(), createAnswerRequest.getIssueId()
-                , createAnswerRequest.getAnswerContent(),createAnswerRequest.getAnswerImages());
+                , createAnswerRequest.getAnswerContent(), createAnswerRequest.getAnswerImages());
         return ResultResponse.success(AnswerMapper.INSTANCT.entity2VO(answer));
+    }
+
+    @GetMapping("/answer/liked")
+    public ResultResponse likedAnswer(@RequestParam Long answerId) {
+        answerService.likedAnswer(answerId);
+        return ResultResponse.success();
+    }
+
+    @GetMapping("/answer/unliked")
+    public ResultResponse unlikedAnswer(@RequestParam Long answerId) {
+        answerService.unlikedAnswer(answerId);
+        return ResultResponse.success();
     }
 }

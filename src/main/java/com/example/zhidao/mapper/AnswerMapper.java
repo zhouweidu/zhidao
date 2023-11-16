@@ -1,10 +1,7 @@
 package com.example.zhidao.mapper;
 
-import com.example.zhidao.pojo.entity.AIAnswer;
 import com.example.zhidao.pojo.entity.Answer;
-import com.example.zhidao.pojo.entity.Issue;
 import com.example.zhidao.pojo.vo.answer.AnswerVO;
-import com.example.zhidao.pojo.vo.issue.IssueAndAIAnswerVO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;

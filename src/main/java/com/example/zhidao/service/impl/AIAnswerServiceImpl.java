@@ -2,6 +2,8 @@ package com.example.zhidao.service.impl;
 
 import com.example.zhidao.dao.AIAnswerRepository;
 import com.example.zhidao.pojo.entity.AIAnswer;
+import com.example.zhidao.pojo.vo.common.BizException;
+import com.example.zhidao.pojo.vo.common.ExceptionEnum;
 import com.example.zhidao.service.AIAnswerService;
 import com.example.zhidao.service.XfService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AIAnswerServiceImpl implements AIAnswerService {
-    @Value("${xf.aiId}")
+    @Value("${ai.aiId}")
     private Integer aiId;
     @Autowired
     private XfService xfService;
@@ -27,6 +29,10 @@ public class AIAnswerServiceImpl implements AIAnswerService {
 
     @Override
     public AIAnswer getAIAnswer(Long issueId) {
-        return aiAnswerRepository.findAIAnswerByIssueId(issueId);
+        AIAnswer aiAnswer = aiAnswerRepository.findAIAnswerByIssueId(issueId);
+        if (aiAnswer == null) {
+            throw new BizException(ExceptionEnum.ISSUE_NOT_EXIST);
+        }
+        return aiAnswer;
     }
 }

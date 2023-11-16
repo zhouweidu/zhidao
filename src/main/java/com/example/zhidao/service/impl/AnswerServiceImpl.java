@@ -6,12 +6,15 @@ import com.example.zhidao.dao.UserRepository;
 import com.example.zhidao.pojo.entity.Answer;
 import com.example.zhidao.pojo.entity.AnswerImage;
 import com.example.zhidao.pojo.entity.User;
+import com.example.zhidao.pojo.vo.common.BizException;
+import com.example.zhidao.pojo.vo.common.ExceptionEnum;
 import com.example.zhidao.service.AnswerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +29,7 @@ public class AnswerServiceImpl implements AnswerService {
     private UserRepository userRepository;
 
     @Override
-    public List<Answer> findAnswerByIssueId(Long issueId, Integer page, Integer pageSize) {
+    public List<Answer> findAnswerPages(Long issueId, Integer page, Integer pageSize) {
         PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC,
                 "likedNumber"));
         Page<Answer> answerPages = answerRepository.findByIssueId(issueId, pageRequest);
@@ -38,6 +41,7 @@ public class AnswerServiceImpl implements AnswerService {
     }
 
     @Override
+    @Transactional
     public Answer createAnswer(String username, Long issueId, String answerContent, List<String> answerImages) {
         User user = userRepository.findUserByUsername(username);
         Answer answer = answerRepository.save(Answer.builder().issueId(issueId).userId(user.getUserId())
@@ -51,5 +55,27 @@ public class AnswerServiceImpl implements AnswerService {
             answerImageRepository.saveAll(answerImageArrayList);
         }
         return answer;
+    }
+
+    @Override
+    public void likedAnswer(Long answerId) {
+        if (answerRepository.findById(answerId).isPresent()) {
+            Answer answer = answerRepository.findById(answerId).get();
+            answerRepository.save(answer.setLikedNumber(answer.getLikedNumber() + 1));
+        } else {
+            throw new BizException(ExceptionEnum.ANSWER_NOT_EXIST);
+        }
+    }
+
+    @Override
+    public void unlikedAnswer(Long answerId) {
+        if (answerRepository.findById(answerId).isPresent()) {
+            Answer answer = answerRepository.findById(answerId).get();
+            answer.setLikedNumber(answer.getLikedNumber() - 1);
+            answerRepository.save(answer);
+        }else{
+            throw new BizException(ExceptionEnum.ANSWER_NOT_EXIST);
+        }
+
     }
 }

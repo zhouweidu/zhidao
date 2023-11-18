@@ -13,6 +13,8 @@ import lombok.experimental.Accessors;
 @Builder
 public class AnswerVO {
     private Long answerId;
+    private Long issueId;
+    private Long userId;
     private String answerContent;
     private Integer likedNumber;//点赞数
     private Integer commentNumber;//评论数

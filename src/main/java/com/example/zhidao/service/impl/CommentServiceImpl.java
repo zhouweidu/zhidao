@@ -61,4 +61,28 @@ public class CommentServiceImpl implements CommentService {
         }
         return comments;
     }
+
+    @Override
+    public void likedComment(Long commentId) {
+        if (commentRepository.findById(commentId).isPresent()) {
+            Comment comment = commentRepository.findById(commentId).get();
+            commentRepository.save(comment.setLikedNumber(comment.getLikedNumber() + 1));
+        } else {
+            throw new BizException(ExceptionEnum.COMMENT_NOT_EXIST);
+        }
+    }
+
+    @Override
+    public void unlikedComment(Long commentId) {
+        if (commentRepository.findById(commentId).isPresent()) {
+            Comment comment = commentRepository.findById(commentId).get();
+            if (comment.getLikedNumber() > 0) {
+                commentRepository.save(comment.setLikedNumber(comment.getLikedNumber() - 1));
+            } else {
+                throw new BizException(ExceptionEnum.COMMENT_LIKED_NUMBER_IS_ZERO);
+            }
+        } else {
+            throw new BizException(ExceptionEnum.COMMENT_NOT_EXIST);
+        }
+    }
 }

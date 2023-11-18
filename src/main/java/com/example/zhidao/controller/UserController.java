@@ -18,6 +18,12 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @GetMapping("/user/{userId}")
+    public ResultResponse getUserInfo(@PathVariable("userId") Long userId) {
+        User user = userService.getUserInfo(userId);
+        return ResultResponse.success(UserMapper.INSTANCT.entity2VO(user));
+    }
+
     @PostMapping("/user/login")
     public ResultResponse login(@Valid @RequestBody LoginRequest loginRequest) {
         User user = userService.login(loginRequest.getUsername(), loginRequest.getPassword());

@@ -44,4 +44,14 @@ public class CommentController {
         }
         return ResultResponse.success(commentVOList);
     }
+    @GetMapping("/comment/liked/{commentId}")
+    public ResultResponse likedComment(@PathVariable("commentId") Long commentId) {
+        commentService.likedComment(commentId);
+        return ResultResponse.success();
+    }
+    @GetMapping("/comment/unliked/{commentId}")
+    public ResultResponse unlikedComment(@PathVariable("commentId") Long commentId) {
+        commentService.unlikedComment(commentId);
+        return ResultResponse.success();
+    }
 }

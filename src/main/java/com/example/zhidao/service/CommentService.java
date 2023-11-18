@@ -10,4 +10,8 @@ public interface CommentService {
     void deleteComment(String username, Long commentId);
 
     List<Comment> findCommentPages(Long answerId, Integer page, Integer pageSize);
+
+    void likedComment(Long commentId);
+
+    void unlikedComment(Long commentId);
 }

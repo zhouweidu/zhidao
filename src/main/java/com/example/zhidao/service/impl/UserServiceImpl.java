@@ -59,4 +59,13 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public User getUserInfo(Long userId) {
+        if (userRepository.findById(userId).isPresent()) {
+            return userRepository.findById(userId).get();
+        } else {
+            throw new BizException(ExceptionEnum.USER_NOT_FOUND);
+        }
+    }
+
 }

@@ -13,6 +13,7 @@ import lombok.experimental.Accessors;
 @Builder
 public class IssueVO {
     private Long issueId;
+    private Long userId;
     private String issueTitle;
     private String issueContent;
     private Integer concernedNumber;//关注人数

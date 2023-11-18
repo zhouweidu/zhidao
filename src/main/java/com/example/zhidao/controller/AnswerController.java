@@ -38,14 +38,14 @@ public class AnswerController {
         return ResultResponse.success(AnswerMapper.INSTANCT.entity2VO(answer));
     }
 
-    @GetMapping("/answer/liked")
-    public ResultResponse likedAnswer(@RequestParam Long answerId) {
+    @GetMapping("/answer/liked/{answerId}")
+    public ResultResponse likedAnswer(@PathVariable("answerId") Long answerId) {
         answerService.likedAnswer(answerId);
         return ResultResponse.success();
     }
 
-    @GetMapping("/answer/unliked")
-    public ResultResponse unlikedAnswer(@RequestParam Long answerId) {
+    @GetMapping("/answer/unliked/{answerId}")
+    public ResultResponse unlikedAnswer(@PathVariable("answerId") Long answerId) {
         answerService.unlikedAnswer(answerId);
         return ResultResponse.success();
     }

@@ -71,9 +71,13 @@ public class AnswerServiceImpl implements AnswerService {
     public void unlikedAnswer(Long answerId) {
         if (answerRepository.findById(answerId).isPresent()) {
             Answer answer = answerRepository.findById(answerId).get();
-            answer.setLikedNumber(answer.getLikedNumber() - 1);
-            answerRepository.save(answer);
-        }else{
+            if (answer.getLikedNumber() > 0) {
+                answer.setLikedNumber(answer.getLikedNumber() - 1);
+                answerRepository.save(answer);
+            }else{
+                throw new BizException(ExceptionEnum.ANSWER_LIKED_NUMBER_IS_ZERO);
+            }
+        } else {
             throw new BizException(ExceptionEnum.ANSWER_NOT_EXIST);
         }
 

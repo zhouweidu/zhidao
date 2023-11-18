@@ -10,4 +10,6 @@ public interface UserService {
     User editInfo(String username, String password, String nickName, String profileImagePath);
 
     User modifyPassword(String username, String oldPassword, String newPassword);
+
+    User getUserInfo(Long userId);
 }

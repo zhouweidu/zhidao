@@ -2,9 +2,10 @@ spring:
   datasource:
     druid:
       driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://124.70.32.163:3306/mise?serverTimezone=UTC
+      url: jdbc:mysql://172.29.4.107:3306/mise?serverTimezone=UTC
       username: root
       password: 123456
+
   jpa:
     database: MySQL
     database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
@@ -13,12 +14,27 @@ spring:
       ddl-auto: update
     open-in-view: false
 
+  redis:
+    host: 172.29.4.107
+    port: 6379
+    password: 123456
+    database: 0
+    lettuce:
+      pool:
+        max-active: 8 #最大连接数
+        max-idle: 8 #最大空闲连接
+        min-idle: 0 #最小空闲连接
+        max-wait: 100 #连接等待时间
+
 server:
-  port: 9001
+  port: 9000
 
 xf-rest:
-  hostUrl: http://localhost:8080/xf
+  hostUrl: http://localhost:9020/xf
   sendQuestionUri: /sendQuestion
 
 ai:
   aiId: 0
+
+redis-constants:
+  aiAnswerTTL: 30

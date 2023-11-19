@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -19,4 +21,5 @@ public class IssueVO {
     private Integer concernedNumber;//关注人数
     private Integer answerNumber;//回答数
     private String createdAt;
+    private List<String> issueImages;
 }

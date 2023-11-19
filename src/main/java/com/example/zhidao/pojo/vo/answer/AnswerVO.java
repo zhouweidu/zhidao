@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,4 +22,5 @@ public class AnswerVO {
     private Integer commentNumber;//评论数
     private Integer collectNumber;//收藏数
     private String createdAt;
+    private List<String> answerImages;
 }

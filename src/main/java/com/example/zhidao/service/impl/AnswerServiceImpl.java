@@ -1,10 +1,8 @@
 package com.example.zhidao.service.impl;
 
-import com.example.zhidao.dao.AnswerImageRepository;
 import com.example.zhidao.dao.AnswerRepository;
 import com.example.zhidao.dao.UserRepository;
 import com.example.zhidao.pojo.entity.Answer;
-import com.example.zhidao.pojo.entity.AnswerImage;
 import com.example.zhidao.pojo.entity.User;
 import com.example.zhidao.pojo.vo.common.BizException;
 import com.example.zhidao.pojo.vo.common.ExceptionEnum;
@@ -24,8 +22,6 @@ public class AnswerServiceImpl implements AnswerService {
     @Autowired
     private AnswerRepository answerRepository;
     @Autowired
-    private AnswerImageRepository answerImageRepository;
-    @Autowired
     private UserRepository userRepository;
 
     @Override
@@ -41,20 +37,20 @@ public class AnswerServiceImpl implements AnswerService {
     }
 
     @Override
-    @Transactional
-    public Answer createAnswer(String username, Long issueId, String answerContent, List<String> answerImages) {
+    public Answer createAnswer(String username, Long issueId, String answerContent) {
         User user = userRepository.findUserByUsername(username);
-        Answer answer = answerRepository.save(Answer.builder().issueId(issueId).userId(user.getUserId())
+        return answerRepository.save(Answer.builder().issueId(issueId).userId(user.getUserId())
                 .answerContent(answerContent).likedNumber(0).commentNumber(0).collectNumber(0).build());
-        if (answerImages != null && answerImages.size() != 0) {
-            ArrayList<AnswerImage> answerImageArrayList = new ArrayList<>();
-            for (String answerImage : answerImages) {
-                answerImageArrayList.add(AnswerImage.builder().
-                        answerId(answer.getAnswerId()).imagePath(answerImage).build());
-            }
-            answerImageRepository.saveAll(answerImageArrayList);
+    }
+
+    @Override
+    @Transactional
+    public void deleteAnswer(Long answerId) {
+        if (answerRepository.findById(answerId).isPresent()) {
+            answerRepository.deleteById(answerId);
+        } else {
+            throw new BizException(ExceptionEnum.ANSWER_NOT_EXIST);
         }
-        return answer;
     }
 
     @Override
@@ -74,7 +70,7 @@ public class AnswerServiceImpl implements AnswerService {
             if (answer.getLikedNumber() > 0) {
                 answer.setLikedNumber(answer.getLikedNumber() - 1);
                 answerRepository.save(answer);
-            }else{
+            } else {
                 throw new BizException(ExceptionEnum.ANSWER_LIKED_NUMBER_IS_ZERO);
             }
         } else {

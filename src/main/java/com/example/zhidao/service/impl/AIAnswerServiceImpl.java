@@ -39,7 +39,7 @@ public class AIAnswerServiceImpl implements AIAnswerService {
                 .aiAnswerContent(aiAnswerString).likedNumber(0)
                 .commentNumber(0).collectNumber(0).build());
         log.info("Create aiAnswer [{}]", aiAnswer);
-        stringRedisTemplate.opsForValue().set(redisConstantsConfig.getAiAnswerKey() + aiAnswer.getAiAnswerId(),
+        stringRedisTemplate.opsForValue().set(redisConstantsConfig.getAiAnswerKey() + issueId,
                 JSONUtil.toJsonStr(aiAnswer), redisConstantsConfig.getAiAnswerTTL(), TimeUnit.MINUTES);
         return aiAnswer;
     }

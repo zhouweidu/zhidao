@@ -7,9 +7,12 @@ import java.util.List;
 public interface AnswerService {
     List<Answer> findAnswerPages(Long issueId, Integer page, Integer pageSize);
 
-    Answer createAnswer(String username, Long issueId, String answerContent, List<String> answerImages);
+    Answer createAnswer(String username, Long issueId, String answerContent);
 
     void likedAnswer(Long answerId);
 
     void unlikedAnswer(Long answerId);
+
+    void deleteAnswer(Long answerId);
+
 }

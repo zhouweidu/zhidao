@@ -38,3 +38,4 @@ ai:
 
 redis-constants:
   aiAnswerTTL: 30
+  usernameTTL: 20

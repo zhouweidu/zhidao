@@ -60,7 +60,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserInfo(Long userId) {
+    public User findUserInfo(Long userId) {
         if (userRepository.findById(userId).isPresent()) {
             return userRepository.findById(userId).get();
         } else {

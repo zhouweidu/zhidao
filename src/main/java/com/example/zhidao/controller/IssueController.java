@@ -5,6 +5,7 @@ import com.example.zhidao.pojo.entity.AIAnswer;
 import com.example.zhidao.pojo.entity.Issue;
 import com.example.zhidao.pojo.entity.IssueImage;
 import com.example.zhidao.pojo.vo.common.ResultResponse;
+import com.example.zhidao.pojo.vo.issue.ConcernOrNotRequest;
 import com.example.zhidao.pojo.vo.issue.CreateIssueRequest;
 import com.example.zhidao.pojo.vo.issue.FindIssuePagesRequest;
 import com.example.zhidao.pojo.vo.issue.IssueVO;
@@ -53,6 +54,48 @@ public class IssueController {
                 issueImagePaths.add(issueImage.getImagePath());
             }
             issueVOList.add(IssueMapper.INSTANCT.entity2VO(issuePage, issueImagePaths));
+        }
+        return ResultResponse.success(issueVOList);
+    }
+
+    @GetMapping("/issue/concern")
+    public ResultResponse concernIssue(@Valid ConcernOrNotRequest concernOrNotRequest) {
+        issueService.concernIssue(concernOrNotRequest.getUsername(), concernOrNotRequest.getIssueId());
+        return ResultResponse.success();
+    }
+
+    @GetMapping("/issue/cancelConcern")
+    public ResultResponse cancelConcernIssue(@Valid ConcernOrNotRequest concernOrNotRequest) {
+        issueService.cancelConcernIssue(concernOrNotRequest.getUsername(), concernOrNotRequest.getIssueId());
+        return ResultResponse.success();
+    }
+
+    @GetMapping("/issue/myConcern")
+    public ResultResponse findMyConcernIssue(@RequestParam String username) {
+        List<Issue> concernIssues = issueService.findMyConcernIssue(username);
+        ArrayList<IssueVO> issueVOList = new ArrayList<>();
+        for (Issue concernIssue : concernIssues) {
+            List<IssueImage> issueImages = issueImageService.findIssueImagesByIssueId(concernIssue.getIssueId());
+            List<String> issueImagePaths = new ArrayList<>();
+            for (IssueImage issueImage : issueImages) {
+                issueImagePaths.add(issueImage.getImagePath());
+            }
+            issueVOList.add(IssueMapper.INSTANCT.entity2VO(concernIssue, issueImagePaths));
+        }
+        return ResultResponse.success(issueVOList);
+    }
+
+    @GetMapping("/issue/myIssue")
+    public ResultResponse findMyIssue(@RequestParam String username) {
+        List<Issue> myIssues = issueService.findMyIssue(username);
+        ArrayList<IssueVO> issueVOList = new ArrayList<>();
+        for (Issue myIssue : myIssues) {
+            List<IssueImage> issueImages = issueImageService.findIssueImagesByIssueId(myIssue.getIssueId());
+            List<String> issueImagePaths = new ArrayList<>();
+            for (IssueImage issueImage : issueImages) {
+                issueImagePaths.add(issueImage.getImagePath());
+            }
+            issueVOList.add(IssueMapper.INSTANCT.entity2VO(myIssue, issueImagePaths));
         }
         return ResultResponse.success(issueVOList);
     }

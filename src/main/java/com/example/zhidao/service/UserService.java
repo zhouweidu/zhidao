@@ -11,5 +11,6 @@ public interface UserService {
 
     User modifyPassword(String username, String oldPassword, String newPassword);
 
-    User getUserInfo(Long userId);
+    User findUserInfo(Long userId);
+
 }

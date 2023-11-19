@@ -50,7 +50,7 @@ public class AIAnswerServiceImpl implements AIAnswerService {
                 .get(redisConstantsConfig.getAiAnswerKey() + issueId);
         if (StrUtil.isNotBlank(aiAnswerJson)) {
             AIAnswer aiAnswerRedis = JSONUtil.toBean(aiAnswerJson, AIAnswer.class);
-            log.info("Get aiAnswer from cache [{}]", aiAnswerRedis);
+            log.info("Get aiAnswer from redis [{}]", aiAnswerRedis);
             return aiAnswerRedis;
         }
         AIAnswer aiAnswer = aiAnswerRepository.findAIAnswerByIssueId(issueId);
@@ -60,7 +60,7 @@ public class AIAnswerServiceImpl implements AIAnswerService {
         String jsonStr = JSONUtil.toJsonStr(aiAnswer);
         stringRedisTemplate.opsForValue().set(redisConstantsConfig.getAiAnswerKey() + issueId, jsonStr
                 , redisConstantsConfig.getAiAnswerTTL(), TimeUnit.MINUTES);
-        log.info("Get aiAnswer form db [{}]", aiAnswer);
+        log.info("Get aiAnswer form database [{}]", aiAnswer);
         return aiAnswer;
     }
 }

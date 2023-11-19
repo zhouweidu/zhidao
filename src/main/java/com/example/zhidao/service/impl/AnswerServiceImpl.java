@@ -12,7 +12,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,7 +43,6 @@ public class AnswerServiceImpl implements AnswerService {
     }
 
     @Override
-    @Transactional
     public void deleteAnswer(Long answerId) {
         if (answerRepository.findById(answerId).isPresent()) {
             answerRepository.deleteById(answerId);

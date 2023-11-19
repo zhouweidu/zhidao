@@ -8,8 +8,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "redis-constants")
 public class RedisConstantsConfig {
-    private String aiAnswerKey="aiAnswer:";
-
-    public Long aiAnswerTTL;
-
+    private String aiAnswerKey = "aiAnswer:";
+    private Long aiAnswerTTL;
 }

@@ -10,9 +10,9 @@ public interface IssueService {
 
     void concernIssue(String username, Long issueId);
 
-    void cancelConcernIssue(String username, Long issueId);
+    void unConcernIssue(String username, Long issueId);
 
-    List<Issue> findMyConcernIssue(String username);
+    List<Issue> findMyConcernIssue(String username,Integer page,Integer pageSize);
 
-    List<Issue> findMyIssue(String username);
+    List<Issue> findMyIssue(String username,Integer page,Integer pageSize);
 }

@@ -1,19 +1,17 @@
 package com.example.zhidao.service.impl;
 
 import com.example.zhidao.dao.AnswerRepository;
-import com.example.zhidao.dao.UserRepository;
 import com.example.zhidao.pojo.entity.Answer;
 import com.example.zhidao.pojo.entity.User;
 import com.example.zhidao.pojo.vo.common.BizException;
 import com.example.zhidao.pojo.vo.common.ExceptionEnum;
 import com.example.zhidao.service.AnswerService;
+import com.example.zhidao.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,23 +19,18 @@ public class AnswerServiceImpl implements AnswerService {
     @Autowired
     private AnswerRepository answerRepository;
     @Autowired
-    private UserRepository userRepository;
+    private UserService userService;
 
     @Override
     public List<Answer> findAnswerPages(Long issueId, Integer page, Integer pageSize) {
         PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC,
                 "likedNumber"));
-        Page<Answer> answerPages = answerRepository.findByIssueId(issueId, pageRequest);
-        ArrayList<Answer> answers = new ArrayList<>();
-        for (Answer answerPage : answerPages) {
-            answers.add(answerPage);
-        }
-        return answers;
+        return answerRepository.findByIssueId(issueId, pageRequest).getContent();
     }
 
     @Override
     public Answer createAnswer(String username, Long issueId, String answerContent) {
-        User user = userRepository.findUserByUsername(username);
+        User user = userService.findUserByUsername(username);
         return answerRepository.save(Answer.builder().issueId(issueId).userId(user.getUserId())
                 .answerContent(answerContent).likedNumber(0).commentNumber(0).collectNumber(0).build());
     }

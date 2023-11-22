@@ -5,7 +5,7 @@ import com.example.zhidao.pojo.entity.Comment;
 import com.example.zhidao.pojo.vo.comment.CommentVO;
 import com.example.zhidao.pojo.vo.comment.CreateCommentRequest;
 import com.example.zhidao.pojo.vo.comment.DeleteCommentRequest;
-import com.example.zhidao.pojo.vo.comment.FindCommentRequest;
+import com.example.zhidao.pojo.vo.comment.FindCommentPagesRequest;
 import com.example.zhidao.pojo.vo.common.ResultResponse;
 import com.example.zhidao.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class CommentController {
     }
 
     @GetMapping("/comment")
-    public ResultResponse findCommentPages(@Valid FindCommentRequest findCommentRequest) {
+    public ResultResponse findCommentPages(@Valid FindCommentPagesRequest findCommentRequest) {
         List<Comment> commentPages = commentService.findCommentPages(findCommentRequest.getAnswerId(), findCommentRequest.getPage(),
                 findCommentRequest.getPageSize());
         ArrayList<CommentVO> commentVOList = new ArrayList<>();

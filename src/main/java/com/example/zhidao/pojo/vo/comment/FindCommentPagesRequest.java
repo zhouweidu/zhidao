@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Accessors(chain = true)
 @Builder
-public class FindCommentRequest {
+public class FindCommentPagesRequest {
     @NotNull
     Long answerId;
     @NotNull

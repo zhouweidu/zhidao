@@ -19,7 +19,7 @@ public class UserController {
     private UserService userService;
 
     @GetMapping("/user/{userId}")
-    public ResultResponse getUserInfo(@PathVariable("userId") Long userId) {
+    public ResultResponse findUserInfo(@PathVariable("userId") Long userId) {
         User user = userService.findUserInfo(userId);
         return ResultResponse.success(UserMapper.INSTANCT.entity2VO(user));
     }

@@ -10,6 +10,7 @@ import com.example.zhidao.pojo.vo.common.ResultResponse;
 import com.example.zhidao.service.AnswerImageService;
 import com.example.zhidao.service.AnswerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -32,8 +33,10 @@ public class AnswerController {
         for (Answer answer : answers) {
             List<AnswerImage> answerImages = answerImageService.findAnswerImagesByAnswerId(answer.getAnswerId());
             ArrayList<String> answerImagePaths = new ArrayList<>();
-            for (AnswerImage answerImage : answerImages) {
-                answerImagePaths.add(answerImage.getImagePath());
+            if (answerImages != null && answerImages.size() > 0) {
+                for (AnswerImage answerImage : answerImages) {
+                    answerImagePaths.add(answerImage.getImagePath());
+                }
             }
             answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths));
         }
@@ -41,19 +44,23 @@ public class AnswerController {
     }
 
     @PostMapping("/answer")
+    @Transactional
     public ResultResponse createAnswer(@Valid @RequestBody CreateAnswerRequest createAnswerRequest) {
         Answer answer = answerService.createAnswer(createAnswerRequest.getUsername(),
                 createAnswerRequest.getIssueId(), createAnswerRequest.getAnswerContent());
         List<AnswerImage> answerImages = answerImageService.createAnswerImages(answer.getAnswerId(),
                 createAnswerRequest.getAnswerImages());
         ArrayList<String> answerImagePaths = new ArrayList<>();
-        for (AnswerImage answerImage : answerImages) {
-            answerImagePaths.add(answerImage.getImagePath());
+        if (answerImages != null && answerImages.size() > 0) {
+            for (AnswerImage answerImage : answerImages) {
+                answerImagePaths.add(answerImage.getImagePath());
+            }
         }
         return ResultResponse.success(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths));
     }
 
     @DeleteMapping("/answer/{answerId}")
+    @Transactional
     public ResultResponse deleteAnswer(@PathVariable("answerId") Long answerId) {
         answerService.deleteAnswer(answerId);
         answerImageService.deleteAnswerImages(answerId);

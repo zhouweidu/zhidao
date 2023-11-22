@@ -5,6 +5,7 @@ import com.example.zhidao.pojo.entity.AnswerImage;
 import com.example.zhidao.service.AnswerImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,11 @@ public class AnswerImageServiceImpl implements AnswerImageService {
     }
 
     @Override
+    @Transactional
     public void deleteAnswerImages(Long answerId) {
-        answerImageRepository.deleteAnswerImagesByAnswerId(answerId);
+        List<AnswerImage> images = findAnswerImagesByAnswerId(answerId);
+        if (images != null && images.size() > 0) {
+            answerImageRepository.deleteByAnswerId(answerId);
+        }
     }
 }

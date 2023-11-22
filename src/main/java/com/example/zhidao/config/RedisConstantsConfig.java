@@ -10,4 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class RedisConstantsConfig {
     private String aiAnswerKey = "aiAnswer:";
     private Long aiAnswerTTL;
+
+    private String usernameKey = "username:";
+    private Long usernameTTL;
 }

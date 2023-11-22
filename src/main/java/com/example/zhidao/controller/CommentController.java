@@ -29,8 +29,8 @@ public class CommentController {
     }
 
     @DeleteMapping("/comment")
-    public ResultResponse deleteComment(@Valid @RequestBody DeleteCommentRequest deleteCommentRequest) {
-        commentService.deleteComment(deleteCommentRequest.getUsername(), deleteCommentRequest.getAnswerId());
+    public ResultResponse deleteComment(@Valid DeleteCommentRequest deleteCommentRequest) {
+        commentService.deleteComment(deleteCommentRequest.getUsername(), deleteCommentRequest.getCommentId());
         return ResultResponse.success();
     }
 

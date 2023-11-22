@@ -21,5 +21,5 @@ public class DeleteCommentRequest {
     @Pattern(regexp = "^[a-zA-Z\\d_]*$", message = "用户名只能包含大小写字母,数字,下划线")
     private String username;
     @NotNull
-    private Long answerId;
+    private Long commentId;
 }

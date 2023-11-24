@@ -3,9 +3,11 @@ package com.example.zhidao.service.impl;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.example.zhidao.config.RedisConstantsConfig;
+import com.example.zhidao.dao.AIAnswerCommentRepository;
 import com.example.zhidao.dao.AIAnswerRepository;
 import com.example.zhidao.dao.CollectAIAnswerRepository;
 import com.example.zhidao.pojo.entity.AIAnswer;
+import com.example.zhidao.pojo.entity.AIAnswerComment;
 import com.example.zhidao.pojo.entity.CollectAIAnswer;
 import com.example.zhidao.pojo.vo.common.BizException;
 import com.example.zhidao.pojo.vo.common.ExceptionEnum;
@@ -33,6 +35,8 @@ public class AIAnswerServiceImpl implements AIAnswerService {
     private AIAnswerRepository aiAnswerRepository;
     @Autowired
     private CollectAIAnswerRepository collectAIAnswerRepository;
+    @Autowired
+    private AIAnswerCommentRepository aiAnswerCommentRepository;
     @Autowired
     private UserService userService;
     @Resource
@@ -133,6 +137,20 @@ public class AIAnswerServiceImpl implements AIAnswerService {
             } else {
                 throw new BizException(ExceptionEnum.AI_ANSWER_COLLECT_NUMBER_IS_ZERO);
             }
+        } else {
+            throw new BizException(ExceptionEnum.AI_ANSWER_NOT_EXIST);
+        }
+    }
+
+    @Override
+    public void createAIAnswerComment(String username, Long aiAnswerId, String content) {
+        if (aiAnswerRepository.findById(aiAnswerId).isPresent()) {
+            AIAnswer aiAnswer = aiAnswerRepository.findById(aiAnswerId).get();
+            aiAnswer.setCommentNumber(aiAnswer.getCommentNumber() + 1);
+            aiAnswerRepository.save(aiAnswer);
+            stringRedisTemplate.delete(redisConstantsConfig.getAiAnswerKey() + aiAnswer.getIssueId());
+            aiAnswerCommentRepository.save(AIAnswerComment.builder().aiAnswerId(aiAnswerId)
+                    .userId(userService.findUserByUsername(username).getUserId()).content(content).build());
         } else {
             throw new BizException(ExceptionEnum.AI_ANSWER_NOT_EXIST);
         }

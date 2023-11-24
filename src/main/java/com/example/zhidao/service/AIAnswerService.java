@@ -14,4 +14,6 @@ public interface AIAnswerService {
     void collectAIAnswer(String username,Long aiAnswerId);
 
     void unCollectAIAnswer(String username, Long aiAnswerId);
+
+    void createAIAnswerComment(String username, Long aiAnswerId, String content);
 }

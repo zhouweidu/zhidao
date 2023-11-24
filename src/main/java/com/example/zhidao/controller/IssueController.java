@@ -63,13 +63,13 @@ public class IssueController {
         return ResultResponse.success(issueVOList);
     }
 
-    @GetMapping("/issue/concern")
+    @PostMapping("/issue/concern")
     public ResultResponse concernIssue(@Valid ConcernOrNotRequest concernOrNotRequest) {
         issueService.concernIssue(concernOrNotRequest.getUsername(), concernOrNotRequest.getIssueId());
         return ResultResponse.success();
     }
 
-    @GetMapping("/issue/unConcern")
+    @DeleteMapping("/issue/concern")
     public ResultResponse unConcernIssue(@Valid ConcernOrNotRequest concernOrNotRequest) {
         issueService.unConcernIssue(concernOrNotRequest.getUsername(), concernOrNotRequest.getIssueId());
         return ResultResponse.success();
@@ -78,7 +78,7 @@ public class IssueController {
     @GetMapping("/issue/myConcern")
     public ResultResponse findMyConcernIssue(@Valid FindConcernOrSubmitIssuePagesRequest reqeust) {
         List<Issue> concernIssues = issueService.findMyConcernIssue(reqeust.getUsername(),
-                reqeust.getPage(),reqeust.getPageSize());
+                reqeust.getPage(), reqeust.getPageSize());
         ArrayList<IssueVO> issueVOList = new ArrayList<>();
         for (Issue concernIssue : concernIssues) {
             List<IssueImage> issueImages = issueImageService.findIssueImagesByIssueId(concernIssue.getIssueId());
@@ -96,7 +96,7 @@ public class IssueController {
     @GetMapping("/issue/myIssue")
     public ResultResponse findMyIssue(@Valid FindConcernOrSubmitIssuePagesRequest request) {
         List<Issue> myIssues = issueService.findMyIssue(
-                request.getUsername(),request.getPage(),request.getPageSize());
+                request.getUsername(), request.getPage(), request.getPageSize());
         ArrayList<IssueVO> issueVOList = new ArrayList<>();
         for (Issue myIssue : myIssues) {
             List<IssueImage> issueImages = issueImageService.findIssueImagesByIssueId(myIssue.getIssueId());

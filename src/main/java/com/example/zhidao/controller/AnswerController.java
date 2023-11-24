@@ -67,13 +67,13 @@ public class AnswerController {
         return ResultResponse.success();
     }
 
-    @GetMapping("/answer/liked/{answerId}")
+    @PostMapping("/answer/vote/{answerId}")
     public ResultResponse likedAnswer(@PathVariable("answerId") Long answerId) {
         answerService.likedAnswer(answerId);
         return ResultResponse.success();
     }
 
-    @GetMapping("/answer/unliked/{answerId}")
+    @DeleteMapping("/answer/vote/{answerId}")
     public ResultResponse unlikedAnswer(@PathVariable("answerId") Long answerId) {
         answerService.unlikedAnswer(answerId);
         return ResultResponse.success();

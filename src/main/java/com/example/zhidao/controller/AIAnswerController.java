@@ -3,6 +3,7 @@ package com.example.zhidao.controller;
 import com.example.zhidao.mapper.AIAnswerMapper;
 import com.example.zhidao.pojo.entity.AIAnswer;
 import com.example.zhidao.pojo.vo.aianswer.CollectOrNotRequest;
+import com.example.zhidao.pojo.vo.aianswer.CreateAICommentRequest;
 import com.example.zhidao.pojo.vo.common.ResultResponse;
 import com.example.zhidao.service.AIAnswerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,13 @@ public class AIAnswerController {
     @GetMapping("/aiAnswer/unCollect")
     public ResultResponse unCollectAIAnswer(@Valid CollectOrNotRequest collectOrNotRequest) {
         aiAnswerService.unCollectAIAnswer(collectOrNotRequest.getUsername(), collectOrNotRequest.getAiAnswerId());
+        return ResultResponse.success();
+    }
+
+    @PostMapping("/aiAnswer/comment")
+    public ResultResponse createAIAnswerComment(@Valid @RequestBody CreateAICommentRequest createCommentRequest) {
+        aiAnswerService.createAIAnswerComment(createCommentRequest.getUsername(),
+                createCommentRequest.getAiAnswerId(), createCommentRequest.getContent());
         return ResultResponse.success();
     }
 }

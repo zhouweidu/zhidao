@@ -81,7 +81,8 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public List<Issue> findMyConcernIssue(String username, Integer page, Integer pageSize) {
         User user = userService.findUserByUsername(username);
-        PageRequest pageRequest = PageRequest.of(page, pageSize);
+        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC,
+                "createdAt"));
         List<ConcernedIssue> concernedIssues = concernedIssueRepository
                 .findByUserId(user.getUserId(), pageRequest).getContent();
         ArrayList<Issue> issues = new ArrayList<>();
@@ -94,7 +95,8 @@ public class IssueServiceImpl implements IssueService {
     @Override
     public List<Issue> findMyIssue(String username, Integer page, Integer pageSize) {
         User user = userService.findUserByUsername(username);
-        Pageable pageable = PageRequest.of(page, pageSize);
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC,
+                "createdAt"));
         return issueRepository.findByUserId(user.getUserId(), pageable);
     }
 }

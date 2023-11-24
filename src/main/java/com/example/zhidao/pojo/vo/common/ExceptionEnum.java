@@ -22,7 +22,10 @@ public enum ExceptionEnum implements BaseErrorInfoInterface {
 
     AI_ANSWER_NOT_EXIST("4040", "ai回答不存在"),
     AI_ANSWER_LIKED_NUMBER_IS_ZERO("4041", "ai回答点赞数为0"),
-    AI_ANSWER_COLLECT_NUMBER_IS_ZERO("4042", "ai回答收藏数为0");
+    AI_ANSWER_COLLECT_NUMBER_IS_ZERO("4042", "ai回答收藏数为0"),
+    AI_ANSWER_COMMENT_NOT_EXIST("4043","ai回答评论不存在" ),
+    AI_ANSWER_COMMENT_NUMBER_IS_ZERO("4044","ai回答评论数为0" ),
+    AI_ANSWER_COMMENT_NOT_BELONG_TO_USER("4045","不能删除别人ai回答的评论" );
 
 
     /**

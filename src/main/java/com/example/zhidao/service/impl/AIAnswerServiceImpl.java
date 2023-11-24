@@ -9,6 +9,7 @@ import com.example.zhidao.dao.CollectAIAnswerRepository;
 import com.example.zhidao.pojo.entity.AIAnswer;
 import com.example.zhidao.pojo.entity.AIAnswerComment;
 import com.example.zhidao.pojo.entity.CollectAIAnswer;
+import com.example.zhidao.pojo.entity.User;
 import com.example.zhidao.pojo.vo.common.BizException;
 import com.example.zhidao.pojo.vo.common.ExceptionEnum;
 import com.example.zhidao.service.AIAnswerService;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -154,5 +157,42 @@ public class AIAnswerServiceImpl implements AIAnswerService {
         } else {
             throw new BizException(ExceptionEnum.AI_ANSWER_NOT_EXIST);
         }
+    }
+
+    @Override
+    @Transactional
+    public void deleteAIAnswerComment(String username, Long commentId) {
+        if (aiAnswerCommentRepository.findById(commentId).isPresent()) {
+            AIAnswerComment aiAnswerComment = aiAnswerCommentRepository.findById(commentId).get();
+            AIAnswer aiAnswer = aiAnswerRepository.findById(aiAnswerComment.getAiAnswerId()).get();
+            if (!aiAnswerComment.getUserId().equals(userService.findUserByUsername(username).getUserId())) {
+                throw new BizException(ExceptionEnum.AI_ANSWER_COMMENT_NOT_BELONG_TO_USER);
+            }
+            if (aiAnswer.getCommentNumber() > 0) {
+                aiAnswer.setCommentNumber(aiAnswer.getCommentNumber() - 1);
+                aiAnswerRepository.save(aiAnswer);
+                aiAnswerCommentRepository.deleteById(commentId);
+                stringRedisTemplate.delete(redisConstantsConfig.getAiAnswerKey() + aiAnswer.getIssueId());
+            } else {
+                throw new BizException(ExceptionEnum.AI_ANSWER_COMMENT_NUMBER_IS_ZERO);
+            }
+        } else {
+            throw new BizException(ExceptionEnum.AI_ANSWER_COMMENT_NOT_EXIST);
+        }
+
+    }
+
+    @Override
+    public List<AIAnswer> getMyCollectAIAnswer(String username, Integer page, Integer pageSize) {
+        User user = userService.findUserByUsername(username);
+        List<CollectAIAnswer> collectAIAnswerList = collectAIAnswerRepository.findAllByUserId(user.getUserId());
+        List<AIAnswer> aiAnswerList = new ArrayList<>();
+        if (collectAIAnswerList == null || collectAIAnswerList.size() == 0) {
+            return aiAnswerList;
+        }
+        for (CollectAIAnswer collectAIAnswer : collectAIAnswerList) {
+            aiAnswerList.add(aiAnswerRepository.findById(collectAIAnswer.getAiAnswerId()).get());
+        }
+        return aiAnswerList;
     }
 }

@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class SearchRequest {
     @NotBlank
-    private String issueTitle;
+    private String keyword;
     @NotNull
     private Integer page;
     @NotNull

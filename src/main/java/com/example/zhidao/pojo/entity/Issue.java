@@ -17,7 +17,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Accessors(chain = true)
 @Builder
-public class    Issue {
+public class Issue {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long issueId;

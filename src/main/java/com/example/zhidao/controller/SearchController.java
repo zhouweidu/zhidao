@@ -22,7 +22,8 @@ public class SearchController {
     private SearchService searchService;
     @GetMapping("/search")
     public ResultResponse search(@Valid SearchRequest searchRequest) {
-        List<Issue> search = searchService.search(searchRequest.getIssueTitle(), searchRequest.getPage(), searchRequest.getPageSize());
+        List<Issue> search = searchService.search(searchRequest.getKeyword(),
+                searchRequest.getPage(), searchRequest.getPageSize());
         ArrayList<IssueVO> issueVOList = new ArrayList<>();
         for (Issue issue : search) {
             issueVOList.add(IssueMapper.INSTANCT.entity2VO(issue,new ArrayList<>()));

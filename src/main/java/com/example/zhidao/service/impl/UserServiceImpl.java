@@ -20,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
     @Resource
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
@@ -103,5 +104,4 @@ public class UserServiceImpl implements UserService {
             }
         }
     }
-
 }

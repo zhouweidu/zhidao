@@ -15,4 +15,13 @@ public interface AnswerService {
 
     void deleteAnswer(Long answerId);
 
+    void collectAnswer(String username,Long answerId);
+
+    void unCollectAnswer(String username, Long answerId);
+
+    List<Answer> findMyCollectedAnswer(String username, Integer page, Integer pageSize);
+
+    List<Answer> findMyAnswer(String username, Integer page, Integer pageSize);
+    List<Answer> findAnswersByFollowedUsers(Long userId, Integer page, Integer pageSize);
+    List<Object> findMyCollectedAIAndNormalAnswers(String username, Integer page, Integer pageSize);
 }

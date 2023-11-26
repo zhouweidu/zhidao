@@ -7,6 +7,10 @@ public enum ExceptionEnum implements BaseErrorInfoInterface {
     INVALID_CREDENTIAL("4000", "用户名或密码错误"),
     USERNAME_EXIST("4001", "用户名已存在"),
     USER_NOT_FOUND("4002", "用户不存在"),
+    CANNOT_FOLLOW_SELF("4003", "不能关注自己"),
+    CANNOT_UNFOLLOW_SELF("4004", "不能取关自己"),
+    RELATIONSHIP_ALREADY_EXISTS("4005", "已关注"),
+    RELATIONSHIP_DOES_NOT_EXIST("4006", "未关注"),
 
     ISSUE_NOT_EXIST("4010", "问题不存在"),
     ISSUE_CONCERN_NUMBER_IS_ZERO("4011", "问题的关注数为0"),

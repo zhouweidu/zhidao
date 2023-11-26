@@ -1,11 +1,11 @@
 package com.example.zhidao.controller;
 
+import com.example.zhidao.dao.AIAnswerRepository;
+import com.example.zhidao.dao.AnswerRepository;
+import com.example.zhidao.mapper.AIAnswerMapper;
 import com.example.zhidao.mapper.AnswerMapper;
-import com.example.zhidao.pojo.entity.Answer;
-import com.example.zhidao.pojo.entity.AnswerImage;
-import com.example.zhidao.pojo.vo.answer.AnswerVO;
-import com.example.zhidao.pojo.vo.answer.CreateAnswerRequest;
-import com.example.zhidao.pojo.vo.answer.FindAnswerPagesRequest;
+import com.example.zhidao.pojo.entity.*;
+import com.example.zhidao.pojo.vo.answer.*;
 import com.example.zhidao.pojo.vo.common.ResultResponse;
 import com.example.zhidao.service.AnswerImageService;
 import com.example.zhidao.service.AnswerService;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -24,6 +25,10 @@ public class AnswerController {
     private AnswerService answerService;
     @Autowired
     private AnswerImageService answerImageService;
+    @Autowired
+    private AnswerRepository answerRepository;
+    @Autowired
+    private AIAnswerRepository aiAnswerRepository;
 
     @GetMapping("/answer/page")
     public ResultResponse findAnswerPages(@Valid FindAnswerPagesRequest findAnswerPagesRequest) {
@@ -78,4 +83,102 @@ public class AnswerController {
         answerService.unlikedAnswer(answerId);
         return ResultResponse.success();
     }
+
+    @PostMapping("/answer/collect")
+    public ResultResponse collectAnswer(@Valid @RequestBody CollectAnswerOrNotRequest collectAnswerOrNotRequest) {
+        answerService.collectAnswer(collectAnswerOrNotRequest.getUsername(), collectAnswerOrNotRequest.getAnswerId());
+        return ResultResponse.success();
+    }
+
+    @DeleteMapping("/answer/collect")
+    public ResultResponse unCollectAnswer(@Valid @RequestBody CollectAnswerOrNotRequest collectAnswerOrNotRequest) {
+        answerService.unCollectAnswer(collectAnswerOrNotRequest.getUsername(), collectAnswerOrNotRequest.getAnswerId());
+        return ResultResponse.success();
+    }
+
+    @GetMapping("/answer/myCollected")
+    public ResultResponse findMyCollectedAnswers(@Valid FindMyOrCollectedAnswersPagesRequest request) {
+        List<Answer> collectedAnswers = answerService.findMyCollectedAnswer(request.getUsername(), request.getPage(), request.getPageSize());
+        ArrayList<AnswerVO> answerVOList = new ArrayList<>();
+        for (Answer answer : collectedAnswers) {
+            List<AnswerImage> answerImages = answerImageService.findAnswerImagesByAnswerId(answer.getAnswerId());
+            ArrayList<String> answerImagePaths = new ArrayList<>();
+            for (AnswerImage answerImage : answerImages) {
+                answerImagePaths.add(answerImage.getImagePath());
+            }
+            answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths));
+        }
+        return ResultResponse.success(answerVOList);
+    }
+
+    @GetMapping("/answer/myAnswers")
+    public ResultResponse findMyAnswers(@Valid FindMyOrCollectedAnswersPagesRequest request) {
+        List<Answer> myAnswers = answerService.findMyAnswer(request.getUsername(), request.getPage(), request.getPageSize());
+        ArrayList<AnswerVO> answerVOList = new ArrayList<>();
+        for (Answer answer : myAnswers) {
+            List<AnswerImage> answerImages = answerImageService.findAnswerImagesByAnswerId(answer.getAnswerId());
+            ArrayList<String> answerImagePaths = new ArrayList<>();
+            for (AnswerImage answerImage : answerImages) {
+                answerImagePaths.add(answerImage.getImagePath());
+            }
+            answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths));
+        }
+        return ResultResponse.success(answerVOList);
+    }
+    @GetMapping("/answer/followed")
+    public ResultResponse findAnswersByFollowedUsers(@Valid FindAnswersByFollowedUsersPagesRequest request) {
+        List<Answer> followedUserAnswers = answerService.findAnswersByFollowedUsers(request.getUserId(), request.getPage(), request.getPageSize());
+        ArrayList<AnswerVO> answerVOList = new ArrayList<>();
+        for (Answer answer : followedUserAnswers) {
+            List<AnswerImage> answerImages = answerImageService.findAnswerImagesByAnswerId(answer.getAnswerId());
+            ArrayList<String> answerImagePaths = new ArrayList<>();
+            for (AnswerImage answerImage : answerImages) {
+                answerImagePaths.add(answerImage.getImagePath());
+            }
+            answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths));
+        }
+        return ResultResponse.success(answerVOList);
+    }
+    @GetMapping("/answer/all")
+    public ResultResponse findMyCollectedAIAndNormalAnswers(@Valid FindMyCollectedAIAndNormalAnswersPagesRequest request) {
+        List<Object> collectedAnswers = answerService.findMyCollectedAIAndNormalAnswers(request.getUsername(), request.getPage(), request.getPageSize());
+
+        ArrayList<AnswerVO> answerVOList = new ArrayList<>();
+        for (Object obj : collectedAnswers) {
+            if (obj instanceof CollectAIAnswer) {
+                // 处理 CollectAIAnswer 对象
+                CollectAIAnswer collectAIAnswer = (CollectAIAnswer) obj;
+                AIAnswer aiAnswer = aiAnswerRepository.findById(collectAIAnswer.getAiAnswerId()).orElse(null);
+                if (aiAnswer != null) {
+                    answerVOList.add(convertAIAnswerToAnswerVO(aiAnswer));
+                }
+            } else if (obj instanceof CollectAnswer) {
+                // 处理 CollectAnswer 对象
+                CollectAnswer collectAnswer = (CollectAnswer) obj;
+                Answer answer = answerRepository.findById(collectAnswer.getAnswerId()).orElse(null);
+                if (answer != null) {
+                    List<AnswerImage> answerImages = answerImageService.findAnswerImagesByAnswerId(answer.getAnswerId());
+                    ArrayList<String> answerImagePaths = answerImages.stream()
+                            .map(AnswerImage::getImagePath)
+                            .collect(Collectors.toCollection(ArrayList::new));
+                    answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths));
+                }
+            }
+        }
+        return ResultResponse.success(answerVOList);
+    }
+    private AnswerVO convertAIAnswerToAnswerVO(AIAnswer aiAnswer) {
+        return AnswerVO.builder()
+                .answerId(aiAnswer.getAiAnswerId())
+                .issueId(aiAnswer.getIssueId())
+                .userId(null) // 将 AI 答案的 userId 设置为 null
+                .answerContent(aiAnswer.getAiAnswerContent())
+                .likedNumber(aiAnswer.getLikedNumber())
+                .commentNumber(aiAnswer.getCommentNumber())
+                .collectNumber(aiAnswer.getCollectNumber())
+                .createdAt(String.valueOf(aiAnswer.getCreatedAt()))
+                .answerImages(new ArrayList<>())
+                .build();
+    }
+
 }

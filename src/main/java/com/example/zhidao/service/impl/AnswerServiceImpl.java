@@ -1,25 +1,44 @@
 package com.example.zhidao.service.impl;
 
-import com.example.zhidao.dao.AnswerRepository;
-import com.example.zhidao.pojo.entity.Answer;
-import com.example.zhidao.pojo.entity.User;
+import com.example.zhidao.config.RedisConstantsConfig;
+import com.example.zhidao.dao.*;
+import com.example.zhidao.pojo.entity.*;
 import com.example.zhidao.pojo.vo.common.BizException;
 import com.example.zhidao.pojo.vo.common.ExceptionEnum;
 import com.example.zhidao.service.AnswerService;
 import com.example.zhidao.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Resource;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AnswerServiceImpl implements AnswerService {
     @Autowired
     private AnswerRepository answerRepository;
     @Autowired
+    private CollectAIAnswerRepository collectAIAnswerRepository;
+    @Autowired
+    private CollectAnswerRepository collectAnswerRepository;
+    @Autowired
+    private FollowerRepository followerRepository;
+    @Autowired
     private UserService userService;
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private RedisConstantsConfig redisConstantsConfig;
 
     @Override
     public List<Answer> findAnswerPages(Long issueId, Integer page, Integer pageSize) {
@@ -67,6 +86,105 @@ public class AnswerServiceImpl implements AnswerService {
         } else {
             throw new BizException(ExceptionEnum.ANSWER_NOT_EXIST);
         }
+    }
 
+    @Transactional
+    @Override
+    public void collectAnswer(String username, Long answerId) {
+        if (answerRepository.findById(answerId).isPresent()) {
+            Answer answer = answerRepository.findById(answerId).get();
+            answer.setCollectNumber(answer.getCollectNumber() + 1);
+            answerRepository.save(answer);
+            stringRedisTemplate.delete(redisConstantsConfig.getAnswerKey() + answer.getIssueId());
+            collectAnswerRepository.save(CollectAnswer.builder().answerId(answerId).userId(userService.findUserByUsername(username).getUserId()).build());
+        } else {
+            throw new BizException(ExceptionEnum.ANSWER_NOT_EXIST);
+        }
+    }
+
+    @Transactional
+    @Override
+    public void unCollectAnswer(String username, Long answerId) {
+        if (answerRepository.findById(answerId).isPresent()) {
+            Answer answer = answerRepository.findById(answerId).get();
+            if (answer.getCollectNumber() > 0) {
+                answer.setCollectNumber(answer.getCollectNumber() - 1);
+                answerRepository.save(answer);
+                stringRedisTemplate.delete(redisConstantsConfig.getAnswerKey() + answer.getIssueId());
+                collectAnswerRepository.deleteByUserIdAndAnswerId(userService.findUserByUsername(username).getUserId(), answerId);
+            } else {
+                throw new BizException(ExceptionEnum.ANSWER_COLLECT_NUMBER_IS_ZERO);
+            }
+        } else {
+            throw new BizException(ExceptionEnum.ANSWER_NOT_EXIST);
+        }
+    }
+
+    @Override
+    public List<Answer> findMyCollectedAnswer(String username, Integer page, Integer pageSize) {
+        User user = userService.findUserByUsername(username);
+        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<CollectAnswer> collectedAnswers = collectAnswerRepository.findByUserId(user.getUserId(), pageRequest);
+
+        List<Answer> answers = new ArrayList<>();
+        for (CollectAnswer collectAnswer : collectedAnswers) {
+            answers.add(answerRepository.findById(collectAnswer.getAnswerId()).orElseThrow(() ->
+                    new BizException(ExceptionEnum.ANSWER_NOT_EXIST)));
+        }
+        return answers;
+    }
+
+    @Override
+    public List<Answer> findMyAnswer(String username, Integer page, Integer pageSize) {
+        User user = userService.findUserByUsername(username);
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return answerRepository.findByUserId(user.getUserId(), pageable);
+    }
+
+    @Override
+    public List<Answer> findAnswersByFollowedUsers(Long userId, Integer page, Integer pageSize) {
+        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        // 获取用户关注的所有人的ID
+        List<Long> followedUserIds = followerRepository.findByFollowerId(userId)
+                .stream()
+                .map(Follower::getFollowedId)
+                .collect(Collectors.toList());
+
+        if (followedUserIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // 获取这些用户的回答
+        return answerRepository.findByUserIdIn(followedUserIds, pageable);
+    }
+    @Override
+    public List<Object> findMyCollectedAIAndNormalAnswers(String username, Integer page, Integer pageSize) {
+        User user = userService.findUserByUsername(username);
+        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        // 获取收藏的 AI 答案
+        List<CollectAIAnswer> collectedAIAnswers = collectAIAnswerRepository.findAllByUserId(user.getUserId(),pageRequest);
+
+        // 获取收藏的普通答案
+        List<CollectAnswer> collectedAnswers = collectAnswerRepository.findByUserId(user.getUserId(), pageRequest);
+
+        // 合并结果
+        List<Object> combinedResults = new ArrayList<>();
+        combinedResults.addAll(collectedAIAnswers);
+        combinedResults.addAll(collectedAnswers);
+
+        // 按收藏时间排序
+        combinedResults.sort((o1, o2) -> {
+            Date date1 = o1 instanceof CollectAIAnswer ? ((CollectAIAnswer) o1).getCreatedAt() : ((CollectAnswer) o1).getCreatedAt();
+            Date date2 = o2 instanceof CollectAIAnswer ? ((CollectAIAnswer) o2).getCreatedAt() : ((CollectAnswer) o2).getCreatedAt();
+            return date2.compareTo(date1); // 按照创建时间降序排序
+        });
+
+        // 返回正确的数据段
+        return combinedResults.stream()
+                .skip(page * pageSize)
+                .limit(pageSize)
+                .collect(Collectors.toList());
     }
 }

@@ -1,11 +1,20 @@
 package com.example.zhidao.service.impl;
 
+<<<<<<< HEAD
 import com.example.zhidao.config.RedisConstantsConfig;
 import com.example.zhidao.dao.*;
 import com.example.zhidao.pojo.entity.*;
+=======
+import com.example.zhidao.dao.AnswerRepository;
+import com.example.zhidao.dao.IssueRepository;
+import com.example.zhidao.pojo.entity.Answer;
+import com.example.zhidao.pojo.entity.Issue;
+import com.example.zhidao.pojo.entity.User;
+>>>>>>> eeada18ea68a3ad80eb389df2799da821ac49d27
 import com.example.zhidao.pojo.vo.common.BizException;
 import com.example.zhidao.pojo.vo.common.ExceptionEnum;
 import com.example.zhidao.service.AnswerService;
+import com.example.zhidao.service.IssueService;
 import com.example.zhidao.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -35,10 +44,15 @@ public class AnswerServiceImpl implements AnswerService {
     private FollowerRepository followerRepository;
     @Autowired
     private UserService userService;
+<<<<<<< HEAD
     @Resource
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private RedisConstantsConfig redisConstantsConfig;
+=======
+    @Autowired
+    private IssueRepository issueRepository;
+>>>>>>> eeada18ea68a3ad80eb389df2799da821ac49d27
 
     @Override
     public List<Answer> findAnswerPages(Long issueId, Integer page, Integer pageSize) {
@@ -48,15 +62,23 @@ public class AnswerServiceImpl implements AnswerService {
     }
 
     @Override
+    @Transactional
     public Answer createAnswer(String username, Long issueId, String answerContent) {
         User user = userService.findUserByUsername(username);
+        Issue issue = issueRepository.findById(issueId).get();
+        issue.setAnswerNumber(issue.getAnswerNumber() + 1);
+        issueRepository.save(issue);
         return answerRepository.save(Answer.builder().issueId(issueId).userId(user.getUserId())
                 .answerContent(answerContent).likedNumber(0).commentNumber(0).collectNumber(0).build());
     }
 
     @Override
+    @Transactional
     public void deleteAnswer(Long answerId) {
         if (answerRepository.findById(answerId).isPresent()) {
+            Answer answer = answerRepository.findById(answerId).get();
+            Issue issue = issueRepository.findById(answer.getIssueId()).get();
+            issue.setAnswerNumber(issue.getAnswerNumber() - 1);
             answerRepository.deleteById(answerId);
         } else {
             throw new BizException(ExceptionEnum.ANSWER_NOT_EXIST);

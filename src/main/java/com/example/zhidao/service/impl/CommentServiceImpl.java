@@ -1,6 +1,8 @@
 package com.example.zhidao.service.impl;
 
+import com.example.zhidao.dao.AnswerRepository;
 import com.example.zhidao.dao.CommentRepository;
+import com.example.zhidao.pojo.entity.Answer;
 import com.example.zhidao.pojo.entity.Comment;
 import com.example.zhidao.pojo.entity.User;
 import com.example.zhidao.pojo.vo.common.BizException;
@@ -12,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,15 +26,22 @@ public class CommentServiceImpl implements CommentService {
     private CommentRepository commentRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private AnswerRepository answerRepository;
 
     @Override
+    @Transactional
     public Comment createComment(String username, Long answerId, String content) {
         User user = userService.findUserByUsername(username);
+        Answer answer = answerRepository.findById(answerId).get();
+        answer.setCommentNumber(answer.getCommentNumber() + 1);
+        answerRepository.save(answer);
         return commentRepository.save(Comment.builder().userId(user.getUserId()).answerId(answerId)
                 .content(content).likedNumber(0).build());
     }
 
     @Override
+    @Transactional
     public void deleteComment(String username, Long commentId) {
         if (commentRepository.findById(commentId).isPresent()) {
             Comment comment = commentRepository.findById(commentId).get();
@@ -39,6 +49,9 @@ public class CommentServiceImpl implements CommentService {
             if (!Objects.equals(user.getUserId(), comment.getUserId())) {
                 throw new BizException(ExceptionEnum.REMOVE_OTHERS_COMMENT);
             } else {
+                Answer answer = answerRepository.findById(comment.getAnswerId()).get();
+                answer.setCommentNumber(answer.getCommentNumber() - 1);
+                answerRepository.save(answer);
                 commentRepository.deleteById(commentId);
             }
         } else {

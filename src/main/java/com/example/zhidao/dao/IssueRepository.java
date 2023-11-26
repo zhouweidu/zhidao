@@ -9,4 +9,6 @@ import java.util.List;
 
 public interface IssueRepository extends JpaRepository<Issue, Long> {
     List<Issue> findByUserId(Long userId, Pageable pageable);
+
+    Page<Issue> findByIssueTitleLikeOrIssueContentLike(String issueTitle, String issueContent, Pageable pageable);
 }

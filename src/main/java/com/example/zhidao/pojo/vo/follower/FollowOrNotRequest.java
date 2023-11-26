@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
 
 @Data
 @AllArgsConstructor
@@ -14,10 +16,14 @@ import javax.validation.constraints.NotNull;
 @Accessors(chain = true)
 @Builder
 public class FollowOrNotRequest {
-    @NotNull(message = "Follower ID cannot be null")
-    private Long followerId;
+    @NotNull
+    @Size(min = 4, max = 20, message = "用户名长度必须在 4-20 之间")
+    @Pattern(regexp = "^[a-zA-Z\\d_]*$", message = "用户名只能包含大小写字母,数字,下划线")
+    private String myUsername;
 
-    @NotNull(message = "Followed ID cannot be null")
-    private Long followedId;
+    @NotNull
+    @Size(min = 4, max = 20, message = "用户名长度必须在 4-20 之间")
+    @Pattern(regexp = "^[a-zA-Z\\d_]*$", message = "用户名只能包含大小写字母,数字,下划线")
+    private String followUsername;
 }
 

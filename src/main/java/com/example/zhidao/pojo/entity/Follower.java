@@ -24,8 +24,8 @@ public class Follower {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long followerId;
-    private Long followedId;
+    private Long myId;//自己
+    private Long followerId;//关注的人
     @CreationTimestamp
     private Date createdAt;
     @UpdateTimestamp

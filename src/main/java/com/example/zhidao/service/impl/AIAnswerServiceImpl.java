@@ -18,6 +18,8 @@ import com.example.zhidao.service.XfService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -118,10 +120,9 @@ public class AIAnswerServiceImpl implements AIAnswerService {
             AIAnswer aiAnswer = aiAnswerRepository.findById(aiAnswerId).get();
             aiAnswer.setCollectNumber(aiAnswer.getCollectNumber() + 1);
             aiAnswerRepository.save(aiAnswer);
-            stringRedisTemplate.delete(redisConstantsConfig.getAiAnswerKey() + aiAnswer.getIssueId());
             collectAIAnswerRepository.save(CollectAIAnswer.builder().aiAnswerId(aiAnswerId)
                     .userId(userService.findUserByUsername(username).getUserId()).build());
-
+            stringRedisTemplate.delete(redisConstantsConfig.getAiAnswerKey() + aiAnswer.getIssueId());
         } else {
             throw new BizException(ExceptionEnum.AI_ANSWER_NOT_EXIST);
         }
@@ -135,8 +136,9 @@ public class AIAnswerServiceImpl implements AIAnswerService {
             if (aiAnswer.getCollectNumber() > 0) {
                 aiAnswer.setCollectNumber(aiAnswer.getCollectNumber() - 1);
                 aiAnswerRepository.save(aiAnswer);
+                collectAIAnswerRepository.deleteByUserIdAndAiAnswerId(
+                        userService.findUserByUsername(username).getUserId(), aiAnswerId);
                 stringRedisTemplate.delete(redisConstantsConfig.getAiAnswerKey() + aiAnswer.getIssueId());
-                collectAIAnswerRepository.deleteByUserIdAndAiAnswerId(userService.findUserByUsername(username).getUserId(), aiAnswerId);
             } else {
                 throw new BizException(ExceptionEnum.AI_ANSWER_COLLECT_NUMBER_IS_ZERO);
             }
@@ -151,9 +153,9 @@ public class AIAnswerServiceImpl implements AIAnswerService {
             AIAnswer aiAnswer = aiAnswerRepository.findById(aiAnswerId).get();
             aiAnswer.setCommentNumber(aiAnswer.getCommentNumber() + 1);
             aiAnswerRepository.save(aiAnswer);
-            stringRedisTemplate.delete(redisConstantsConfig.getAiAnswerKey() + aiAnswer.getIssueId());
             aiAnswerCommentRepository.save(AIAnswerComment.builder().aiAnswerId(aiAnswerId)
                     .userId(userService.findUserByUsername(username).getUserId()).content(content).build());
+            stringRedisTemplate.delete(redisConstantsConfig.getAiAnswerKey() + aiAnswer.getIssueId());
         } else {
             throw new BizException(ExceptionEnum.AI_ANSWER_NOT_EXIST);
         }
@@ -185,7 +187,8 @@ public class AIAnswerServiceImpl implements AIAnswerService {
     @Override
     public List<AIAnswer> getMyCollectAIAnswer(String username, Integer page, Integer pageSize) {
         User user = userService.findUserByUsername(username);
-        List<CollectAIAnswer> collectAIAnswerList = collectAIAnswerRepository.findAllByUserId(user.getUserId());
+        PageRequest pageRequest = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<CollectAIAnswer> collectAIAnswerList = collectAIAnswerRepository.findAllByUserId(user.getUserId(), pageRequest);
         List<AIAnswer> aiAnswerList = new ArrayList<>();
         if (collectAIAnswerList == null || collectAIAnswerList.size() == 0) {
             return aiAnswerList;

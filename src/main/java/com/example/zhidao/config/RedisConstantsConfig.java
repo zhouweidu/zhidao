@@ -11,9 +11,6 @@ public class RedisConstantsConfig {
     private String aiAnswerKey = "aiAnswer:";
     private Long aiAnswerTTL;
 
-    private String answerKey = "answer:";
-    private Long answerTTL;
-
     private String usernameKey = "username:";
     private Long usernameTTL;
 }

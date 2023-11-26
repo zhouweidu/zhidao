@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -85,13 +86,13 @@ public class AnswerController {
     }
 
     @PostMapping("/answer/collect")
-    public ResultResponse collectAnswer(@Valid @RequestBody CollectAnswerOrNotRequest collectAnswerOrNotRequest) {
+    public ResultResponse collectAnswer(@Valid CollectAnswerOrNotRequest collectAnswerOrNotRequest) {
         answerService.collectAnswer(collectAnswerOrNotRequest.getUsername(), collectAnswerOrNotRequest.getAnswerId());
         return ResultResponse.success();
     }
 
     @DeleteMapping("/answer/collect")
-    public ResultResponse unCollectAnswer(@Valid @RequestBody CollectAnswerOrNotRequest collectAnswerOrNotRequest) {
+    public ResultResponse unCollectAnswer(@Valid CollectAnswerOrNotRequest collectAnswerOrNotRequest) {
         answerService.unCollectAnswer(collectAnswerOrNotRequest.getUsername(), collectAnswerOrNotRequest.getAnswerId());
         return ResultResponse.success();
     }
@@ -125,32 +126,19 @@ public class AnswerController {
         }
         return ResultResponse.success(answerVOList);
     }
-    @GetMapping("/answer/followed")
-    public ResultResponse findAnswersByFollowedUsers(@Valid FindAnswersByFollowedUsersPagesRequest request) {
-        List<Answer> followedUserAnswers = answerService.findAnswersByFollowedUsers(request.getUserId(), request.getPage(), request.getPageSize());
-        ArrayList<AnswerVO> answerVOList = new ArrayList<>();
-        for (Answer answer : followedUserAnswers) {
-            List<AnswerImage> answerImages = answerImageService.findAnswerImagesByAnswerId(answer.getAnswerId());
-            ArrayList<String> answerImagePaths = new ArrayList<>();
-            for (AnswerImage answerImage : answerImages) {
-                answerImagePaths.add(answerImage.getImagePath());
-            }
-            answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths));
-        }
-        return ResultResponse.success(answerVOList);
-    }
+
     @GetMapping("/answer/all")
     public ResultResponse findMyCollectedAIAndNormalAnswers(@Valid FindMyCollectedAIAndNormalAnswersPagesRequest request) {
         List<Object> collectedAnswers = answerService.findMyCollectedAIAndNormalAnswers(request.getUsername(), request.getPage(), request.getPageSize());
 
-        ArrayList<AnswerVO> answerVOList = new ArrayList<>();
+        ArrayList<AIAnswerOrAnswerVO> aiAnswerOrAnswerVOS = new ArrayList<>();
         for (Object obj : collectedAnswers) {
             if (obj instanceof CollectAIAnswer) {
                 // 处理 CollectAIAnswer 对象
                 CollectAIAnswer collectAIAnswer = (CollectAIAnswer) obj;
                 AIAnswer aiAnswer = aiAnswerRepository.findById(collectAIAnswer.getAiAnswerId()).orElse(null);
                 if (aiAnswer != null) {
-                    answerVOList.add(convertAIAnswerToAnswerVO(aiAnswer));
+                    aiAnswerOrAnswerVOS.add(convertAIAnswerToAnswerVO(aiAnswer));
                 }
             } else if (obj instanceof CollectAnswer) {
                 // 处理 CollectAnswer 对象
@@ -161,14 +149,29 @@ public class AnswerController {
                     ArrayList<String> answerImagePaths = answerImages.stream()
                             .map(AnswerImage::getImagePath)
                             .collect(Collectors.toCollection(ArrayList::new));
-                    answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths));
+                    aiAnswerOrAnswerVOS.add(
+                            AIAnswerOrAnswerVO.builder()
+                                    .answerId(answer.getAnswerId())
+                                    .issueId(answer.getIssueId())
+                                    .userId(answer.getUserId())
+                                    .answerContent(answer.getAnswerContent())
+                                    .likedNumber(answer.getLikedNumber())
+                                    .commentNumber(answer.getCommentNumber())
+                                    .collectNumber(answer.getCollectNumber())
+                                    .createdAt(answer.getCreatedAt().toString())
+                                    .answerImages(answerImagePaths)
+                                    .isAIAnswer(false)
+                                    .build()
+                    );
                 }
             }
         }
-        return ResultResponse.success(answerVOList);
+        return ResultResponse.success(aiAnswerOrAnswerVOS);
     }
-    private AnswerVO convertAIAnswerToAnswerVO(AIAnswer aiAnswer) {
-        return AnswerVO.builder()
+
+    private AIAnswerOrAnswerVO convertAIAnswerToAnswerVO(AIAnswer aiAnswer) {
+        SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        return AIAnswerOrAnswerVO.builder()
                 .answerId(aiAnswer.getAiAnswerId())
                 .issueId(aiAnswer.getIssueId())
                 .userId(null) // 将 AI 答案的 userId 设置为 null
@@ -176,8 +179,9 @@ public class AnswerController {
                 .likedNumber(aiAnswer.getLikedNumber())
                 .commentNumber(aiAnswer.getCommentNumber())
                 .collectNumber(aiAnswer.getCollectNumber())
-                .createdAt(String.valueOf(aiAnswer.getCreatedAt()))
+                .createdAt(ft.format(aiAnswer.getCreatedAt()))
                 .answerImages(new ArrayList<>())
+                .isAIAnswer(true)
                 .build();
     }
 

@@ -1,33 +1,20 @@
 package com.example.zhidao.service.impl;
 
-<<<<<<< HEAD
 import com.example.zhidao.config.RedisConstantsConfig;
 import com.example.zhidao.dao.*;
 import com.example.zhidao.pojo.entity.*;
-=======
-import com.example.zhidao.dao.AnswerRepository;
-import com.example.zhidao.dao.IssueRepository;
-import com.example.zhidao.pojo.entity.Answer;
-import com.example.zhidao.pojo.entity.Issue;
-import com.example.zhidao.pojo.entity.User;
->>>>>>> eeada18ea68a3ad80eb389df2799da821ac49d27
 import com.example.zhidao.pojo.vo.common.BizException;
 import com.example.zhidao.pojo.vo.common.ExceptionEnum;
 import com.example.zhidao.service.AnswerService;
-import com.example.zhidao.service.IssueService;
 import com.example.zhidao.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.Resource;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -44,15 +31,10 @@ public class AnswerServiceImpl implements AnswerService {
     private FollowerRepository followerRepository;
     @Autowired
     private UserService userService;
-<<<<<<< HEAD
-    @Resource
-    private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private RedisConstantsConfig redisConstantsConfig;
-=======
     @Autowired
     private IssueRepository issueRepository;
->>>>>>> eeada18ea68a3ad80eb389df2799da821ac49d27
 
     @Override
     public List<Answer> findAnswerPages(Long issueId, Integer page, Integer pageSize) {
@@ -117,7 +99,6 @@ public class AnswerServiceImpl implements AnswerService {
             Answer answer = answerRepository.findById(answerId).get();
             answer.setCollectNumber(answer.getCollectNumber() + 1);
             answerRepository.save(answer);
-            stringRedisTemplate.delete(redisConstantsConfig.getAnswerKey() + answer.getIssueId());
             collectAnswerRepository.save(CollectAnswer.builder().answerId(answerId).userId(userService.findUserByUsername(username).getUserId()).build());
         } else {
             throw new BizException(ExceptionEnum.ANSWER_NOT_EXIST);
@@ -132,7 +113,6 @@ public class AnswerServiceImpl implements AnswerService {
             if (answer.getCollectNumber() > 0) {
                 answer.setCollectNumber(answer.getCollectNumber() - 1);
                 answerRepository.save(answer);
-                stringRedisTemplate.delete(redisConstantsConfig.getAnswerKey() + answer.getIssueId());
                 collectAnswerRepository.deleteByUserIdAndAnswerId(userService.findUserByUsername(username).getUserId(), answerId);
             } else {
                 throw new BizException(ExceptionEnum.ANSWER_COLLECT_NUMBER_IS_ZERO);
@@ -163,23 +143,6 @@ public class AnswerServiceImpl implements AnswerService {
         return answerRepository.findByUserId(user.getUserId(), pageable);
     }
 
-    @Override
-    public List<Answer> findAnswersByFollowedUsers(Long userId, Integer page, Integer pageSize) {
-        Pageable pageable = PageRequest.of(page, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-
-        // 获取用户关注的所有人的ID
-        List<Long> followedUserIds = followerRepository.findByFollowerId(userId)
-                .stream()
-                .map(Follower::getFollowedId)
-                .collect(Collectors.toList());
-
-        if (followedUserIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        // 获取这些用户的回答
-        return answerRepository.findByUserIdIn(followedUserIds, pageable);
-    }
     @Override
     public List<Object> findMyCollectedAIAndNormalAnswers(String username, Integer page, Integer pageSize) {
         User user = userService.findUserByUsername(username);

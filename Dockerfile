@@ -12,11 +12,11 @@ VOLUME /tmp
 
 # 将jar包添加到容器中并更名为zzyy_docker.jar
 
-ADD zhidao-0.0.1-SNAPSHOT.jar /zhidao-back-1.0.jar
+ADD zhidao-0.0.1-SNAPSHOT.jar /zhidao-0.0.1-SNAPSHOT.jar
 
 # 运行jar包
 
-ENTRYPOINT ["java","-jar","/zhidao-back-1.0.jar"]
+ENTRYPOINT ["java","-jar","/zhidao-0.0.1-SNAPSHOT.jar"]
 
 #暴露9000端口作为微服务
 

@@ -9,7 +9,5 @@ import java.util.List;
 public interface CollectAIAnswerRepository extends JpaRepository<CollectAIAnswer,Long> {
     void deleteByUserIdAndAiAnswerId(Long userId, Long aiAnswerId);
 
-    List<CollectAIAnswer> findAllByUserId(Long userId);
-
     List<CollectAIAnswer> findAllByUserId(Long userId, PageRequest pageRequest);
 }

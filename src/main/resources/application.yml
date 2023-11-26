@@ -30,8 +30,8 @@ server:
   port: 9000
 
 xf-rest:
-  hostUrl: http://localhost:9020/xf
-  sendQuestionUri: /sendQuestion
+  hostUrl: http://172.29.4.107:9020
+  sendQuestionUri: /xf/sendQuestion
 
 ai:
   aiId: 0

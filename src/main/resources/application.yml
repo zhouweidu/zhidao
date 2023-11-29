@@ -37,5 +37,6 @@ ai:
   aiId: 0
 
 redis-constants:
-  aiAnswerTTL: 30
-  usernameTTL: 20
+  aiAnswerTTL: 20
+  usernameTTL: 10
+  userIdTTL: 10

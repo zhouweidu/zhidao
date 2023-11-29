@@ -4,6 +4,7 @@ import com.example.zhidao.mapper.IssueMapper;
 import com.example.zhidao.pojo.entity.AIAnswer;
 import com.example.zhidao.pojo.entity.Issue;
 import com.example.zhidao.pojo.entity.IssueImage;
+import com.example.zhidao.pojo.entity.User;
 import com.example.zhidao.pojo.vo.common.ResultResponse;
 import com.example.zhidao.pojo.vo.issue.ConcernOrNotRequest;
 import com.example.zhidao.pojo.vo.issue.CreateIssueRequest;
@@ -13,6 +14,7 @@ import com.example.zhidao.pojo.vo.issue.FindConcernOrSubmitIssuePagesRequest;
 import com.example.zhidao.service.AIAnswerService;
 import com.example.zhidao.service.IssueImageService;
 import com.example.zhidao.service.IssueService;
+import com.example.zhidao.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +34,9 @@ public class IssueController {
 
     @Autowired
     private IssueImageService issueImageService;
+
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/issue")
     @Transactional
@@ -58,7 +63,8 @@ public class IssueController {
                     issueImagePaths.add(issueImage.getImagePath());
                 }
             }
-            issueVOList.add(IssueMapper.INSTANCT.entity2VO(issuePage, issueImagePaths));
+            User userInfo = userService.findUserInfo(issuePage.getUserId());
+            issueVOList.add(IssueMapper.INSTANCT.entity2VO(issuePage, issueImagePaths,userInfo.getNickName()));
         }
         return ResultResponse.success(issueVOList);
     }
@@ -88,7 +94,8 @@ public class IssueController {
                     issueImagePaths.add(issueImage.getImagePath());
                 }
             }
-            issueVOList.add(IssueMapper.INSTANCT.entity2VO(concernIssue, issueImagePaths));
+            User userInfo = userService.findUserInfo(concernIssue.getUserId());
+            issueVOList.add(IssueMapper.INSTANCT.entity2VO(concernIssue, issueImagePaths,userInfo.getNickName()));
         }
         return ResultResponse.success(issueVOList);
     }

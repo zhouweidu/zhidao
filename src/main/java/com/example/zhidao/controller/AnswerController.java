@@ -9,6 +9,7 @@ import com.example.zhidao.pojo.vo.answer.*;
 import com.example.zhidao.pojo.vo.common.ResultResponse;
 import com.example.zhidao.service.AnswerImageService;
 import com.example.zhidao.service.AnswerService;
+import com.example.zhidao.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -30,6 +31,8 @@ public class AnswerController {
     private AnswerRepository answerRepository;
     @Autowired
     private AIAnswerRepository aiAnswerRepository;
+    @Autowired
+    private UserService userService;
 
     @GetMapping("/answer/page")
     public ResultResponse findAnswerPages(@Valid FindAnswerPagesRequest findAnswerPagesRequest) {
@@ -44,7 +47,8 @@ public class AnswerController {
                     answerImagePaths.add(answerImage.getImagePath());
                 }
             }
-            answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths));
+            User userInfo = userService.findUserInfo(answer.getUserId());
+            answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths,userInfo.getNickName()));
         }
         return ResultResponse.success(answerVOList);
     }
@@ -107,7 +111,8 @@ public class AnswerController {
             for (AnswerImage answerImage : answerImages) {
                 answerImagePaths.add(answerImage.getImagePath());
             }
-            answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths));
+            User userInfo = userService.findUserInfo(answer.getUserId());
+            answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths,userInfo.getNickName()));
         }
         return ResultResponse.success(answerVOList);
     }
@@ -145,6 +150,7 @@ public class AnswerController {
                 CollectAnswer collectAnswer = (CollectAnswer) obj;
                 Answer answer = answerRepository.findById(collectAnswer.getAnswerId()).orElse(null);
                 if (answer != null) {
+                    User userInfo = userService.findUserInfo(answer.getUserId());
                     List<AnswerImage> answerImages = answerImageService.findAnswerImagesByAnswerId(answer.getAnswerId());
                     ArrayList<String> answerImagePaths = answerImages.stream()
                             .map(AnswerImage::getImagePath)
@@ -154,6 +160,7 @@ public class AnswerController {
                                     .answerId(answer.getAnswerId())
                                     .issueId(answer.getIssueId())
                                     .userId(answer.getUserId())
+                                    .nickName(userInfo.getNickName())
                                     .answerContent(answer.getAnswerContent())
                                     .likedNumber(answer.getLikedNumber())
                                     .commentNumber(answer.getCommentNumber())
@@ -175,6 +182,7 @@ public class AnswerController {
                 .answerId(aiAnswer.getAiAnswerId())
                 .issueId(aiAnswer.getIssueId())
                 .userId(null) // 将 AI 答案的 userId 设置为 null
+                .nickName(null)
                 .answerContent(aiAnswer.getAiAnswerContent())
                 .likedNumber(aiAnswer.getLikedNumber())
                 .commentNumber(aiAnswer.getCommentNumber())

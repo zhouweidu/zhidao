@@ -17,6 +17,7 @@ public class AIAnswerOrAnswerVO {
     private Long answerId;
     private Long issueId;
     private Long userId;
+    private String nickName;
     private String answerContent;
     private Integer likedNumber;//点赞数
     private Integer commentNumber;//评论数

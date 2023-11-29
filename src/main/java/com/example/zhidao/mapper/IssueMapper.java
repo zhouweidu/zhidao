@@ -21,4 +21,7 @@ public interface IssueMapper {
 
     @Mapping(target = "createdAt", source = "issue.createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     IssueVO entity2VO(Issue issue, List<String> issueImages);
+
+    @Mapping(target = "createdAt", source = "issue.createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    IssueVO entity2VO(Issue issue, List<String> issueImages, String nickName);
 }

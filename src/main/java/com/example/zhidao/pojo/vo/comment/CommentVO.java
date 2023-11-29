@@ -14,6 +14,7 @@ import lombok.experimental.Accessors;
 public class CommentVO {
     private Long id;
     private Long userId;
+    private String nickName;
     private Long answerId;
     private String content;
     private Integer likedNumber;

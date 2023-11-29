@@ -16,6 +16,7 @@ import java.util.List;
 public class IssueVO {
     private Long issueId;
     private Long userId;
+    private String nickName;
     private String issueTitle;
     private String issueContent;
     private Integer concernedNumber;//关注人数

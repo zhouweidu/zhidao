@@ -57,6 +57,7 @@ public class UserServiceImpl implements UserService {
             user.setProfileImagePath(profileImagePath);
             User res = userRepository.save(user);
             stringRedisTemplate.delete(redisConstantsConfig.getUsernameKey() + username);
+            stringRedisTemplate.delete(redisConstantsConfig.getUserIdKey() + user.getUserId());
             return res;
         } else {
             throw new BizException(ExceptionEnum.INVALID_CREDENTIAL);
@@ -71,6 +72,7 @@ public class UserServiceImpl implements UserService {
             user.setPassword(DigestUtils.md5Hex(newPassword));
             User res = userRepository.save(user);
             stringRedisTemplate.delete(redisConstantsConfig.getUsernameKey() + username);
+            stringRedisTemplate.delete(redisConstantsConfig.getUserIdKey() + user.getUserId());
             return res;
         } else {
             throw new BizException(ExceptionEnum.INVALID_CREDENTIAL);
@@ -78,9 +80,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public User findUserInfo(Long userId) {
+        String userJson = stringRedisTemplate.opsForValue().get(redisConstantsConfig.getUserIdKey() + userId);
+        if (userJson != null) {
+            return JSONUtil.toBean(userJson, User.class);
+        }
         if (userRepository.findById(userId).isPresent()) {
-            return userRepository.findById(userId).get();
+            User user = userRepository.findById(userId).get();
+            stringRedisTemplate.opsForValue().set(redisConstantsConfig.getUserIdKey() + userId,
+                    JSONUtil.toJsonStr(user), redisConstantsConfig.getUserIdTTL(), TimeUnit.MINUTES);
+            return user;
         } else {
             throw new BizException(ExceptionEnum.USER_NOT_FOUND);
         }

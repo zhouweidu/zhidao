@@ -2,12 +2,14 @@ package com.example.zhidao.controller;
 
 import com.example.zhidao.mapper.CommentMapper;
 import com.example.zhidao.pojo.entity.Comment;
+import com.example.zhidao.pojo.entity.User;
 import com.example.zhidao.pojo.vo.comment.CommentVO;
 import com.example.zhidao.pojo.vo.comment.CreateCommentRequest;
 import com.example.zhidao.pojo.vo.comment.DeleteCommentRequest;
 import com.example.zhidao.pojo.vo.comment.FindCommentPagesRequest;
 import com.example.zhidao.pojo.vo.common.ResultResponse;
 import com.example.zhidao.service.CommentService;
+import com.example.zhidao.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +22,8 @@ import java.util.List;
 public class CommentController {
     @Autowired
     private CommentService commentService;
+    @Autowired
+    private UserService userService;
 
     @PostMapping("/comment")
     public ResultResponse createComment(@Valid @RequestBody CreateCommentRequest createCommentRequest) {
@@ -36,19 +40,22 @@ public class CommentController {
 
     @GetMapping("/comment")
     public ResultResponse findCommentPages(@Valid FindCommentPagesRequest findCommentRequest) {
-        List<Comment> commentPages = commentService.findCommentPages(findCommentRequest.getAnswerId(), findCommentRequest.getPage(),
-                findCommentRequest.getPageSize());
+        List<Comment> commentPages = commentService.findCommentPages(findCommentRequest.getAnswerId(),
+                findCommentRequest.getPage(), findCommentRequest.getPageSize());
         ArrayList<CommentVO> commentVOList = new ArrayList<>();
         for (Comment commentPage : commentPages) {
-            commentVOList.add(CommentMapper.INSTANCT.entity2VO(commentPage));
+            User userInfo = userService.findUserInfo(commentPage.getUserId());
+            commentVOList.add(CommentMapper.INSTANCT.entity2VO(commentPage, userInfo.getNickName()));
         }
         return ResultResponse.success(commentVOList);
     }
+
     @PostMapping("/comment/vote/{commentId}")
     public ResultResponse likedComment(@PathVariable("commentId") Long commentId) {
         commentService.likedComment(commentId);
         return ResultResponse.success();
     }
+
     @DeleteMapping("/comment/vote/{commentId}")
     public ResultResponse unlikedComment(@PathVariable("commentId") Long commentId) {
         commentService.unlikedComment(commentId);

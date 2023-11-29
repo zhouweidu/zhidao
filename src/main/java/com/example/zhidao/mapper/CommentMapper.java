@@ -12,4 +12,7 @@ public interface CommentMapper {
 
     @Mapping(target = "createdAt", source = "createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     CommentVO entity2VO(Comment comment);
+
+    @Mapping(target = "createdAt", source = "comment.createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    CommentVO entity2VO(Comment comment,String nickName);
 }

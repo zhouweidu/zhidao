@@ -13,4 +13,7 @@ public class RedisConstantsConfig {
 
     private String usernameKey = "username:";
     private Long usernameTTL;
+
+    private String userIdKey = "userId:";
+    private Long userIdTTL;
 }

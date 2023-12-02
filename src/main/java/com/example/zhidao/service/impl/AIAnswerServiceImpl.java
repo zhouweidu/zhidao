@@ -6,10 +6,8 @@ import com.example.zhidao.config.RedisConstantsConfig;
 import com.example.zhidao.dao.AIAnswerCommentRepository;
 import com.example.zhidao.dao.AIAnswerRepository;
 import com.example.zhidao.dao.CollectAIAnswerRepository;
-import com.example.zhidao.pojo.entity.AIAnswer;
-import com.example.zhidao.pojo.entity.AIAnswerComment;
-import com.example.zhidao.pojo.entity.CollectAIAnswer;
-import com.example.zhidao.pojo.entity.User;
+import com.example.zhidao.dao.LikeAIAnswerRepository;
+import com.example.zhidao.pojo.entity.*;
 import com.example.zhidao.pojo.vo.common.BizException;
 import com.example.zhidao.pojo.vo.common.ExceptionEnum;
 import com.example.zhidao.service.AIAnswerService;
@@ -42,6 +40,8 @@ public class AIAnswerServiceImpl implements AIAnswerService {
     private CollectAIAnswerRepository collectAIAnswerRepository;
     @Autowired
     private AIAnswerCommentRepository aiAnswerCommentRepository;
+    @Autowired
+    private LikeAIAnswerRepository likeAIAnswerRepository;
     @Autowired
     private UserService userService;
     @Resource
@@ -85,11 +85,13 @@ public class AIAnswerServiceImpl implements AIAnswerService {
 
     @Transactional
     @Override
-    public void likedAIAnswer(Long aiAnswerId) {
+    public void likedAIAnswer(Long aiAnswerId,String username) {
         if (aiAnswerRepository.findById(aiAnswerId).isPresent()) {
             AIAnswer aiAnswer = aiAnswerRepository.findById(aiAnswerId).get();
             aiAnswer.setLikedNumber(aiAnswer.getLikedNumber() + 1);
             aiAnswerRepository.save(aiAnswer);
+            likeAIAnswerRepository.save(LikeAIAnswer.builder().aiAnswerId(aiAnswerId)
+                            .userId(userService.findUserByUsername(username).getUserId()).build());
             stringRedisTemplate.delete(redisConstantsConfig.getAiAnswerKey() + aiAnswer.getIssueId());
         } else {
             throw new BizException(ExceptionEnum.AI_ANSWER_NOT_EXIST);
@@ -98,12 +100,14 @@ public class AIAnswerServiceImpl implements AIAnswerService {
 
     @Transactional
     @Override
-    public void unlikedAIAnswer(Long aiAnswerId) {
+    public void unlikedAIAnswer(Long aiAnswerId,String username) {
         if (aiAnswerRepository.findById(aiAnswerId).isPresent()) {
             AIAnswer aiAnswer = aiAnswerRepository.findById(aiAnswerId).get();
             if (aiAnswer.getLikedNumber() > 0) {
                 aiAnswer.setLikedNumber(aiAnswer.getLikedNumber() - 1);
                 aiAnswerRepository.save(aiAnswer);
+                likeAIAnswerRepository.deleteByAiAnswerIdAndUserId(aiAnswerId,
+                        userService.findUserByUsername(username).getUserId());
                 stringRedisTemplate.delete(redisConstantsConfig.getAiAnswerKey() + aiAnswer.getIssueId());
             } else {
                 throw new BizException(ExceptionEnum.AI_ANSWER_LIKED_NUMBER_IS_ZERO);

@@ -24,4 +24,5 @@ public class AnswerVO {
     private Integer collectNumber;//收藏数
     private String createdAt;
     private List<String> answerImages;
+    private Boolean isLiked;
 }

@@ -2,6 +2,8 @@ package com.example.zhidao.controller;
 
 import com.example.zhidao.dao.AIAnswerRepository;
 import com.example.zhidao.dao.AnswerRepository;
+import com.example.zhidao.dao.LikeAIAnswerRepository;
+import com.example.zhidao.dao.LikeAnswerRepository;
 import com.example.zhidao.mapper.AIAnswerMapper;
 import com.example.zhidao.mapper.AnswerMapper;
 import com.example.zhidao.pojo.entity.*;
@@ -32,6 +34,10 @@ public class AnswerController {
     @Autowired
     private AIAnswerRepository aiAnswerRepository;
     @Autowired
+    private LikeAnswerRepository likeAnswerRepository;
+    @Autowired
+    private LikeAIAnswerRepository likeAIAnswerRepository;
+    @Autowired
     private UserService userService;
 
     @GetMapping("/answer/page")
@@ -39,6 +45,7 @@ public class AnswerController {
         List<Answer> answers = answerService.findAnswerPages(findAnswerPagesRequest.getIssueId(),
                 findAnswerPagesRequest.getPage(), findAnswerPagesRequest.getPageSize());
         ArrayList<AnswerVO> answerVOList = new ArrayList<>();
+        User requestUser = userService.findUserByUsername(findAnswerPagesRequest.getUsername());
         for (Answer answer : answers) {
             List<AnswerImage> answerImages = answerImageService.findAnswerImagesByAnswerId(answer.getAnswerId());
             ArrayList<String> answerImagePaths = new ArrayList<>();
@@ -48,7 +55,10 @@ public class AnswerController {
                 }
             }
             User userInfo = userService.findUserInfo(answer.getUserId());
-            answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths,userInfo.getNickName()));
+            LikeAnswer likeAnswer = likeAnswerRepository
+                    .findByAnswerIdAndUserId(answer.getAnswerId(), requestUser.getUserId());
+            answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths,userInfo.getNickName(),
+                    likeAnswer != null));
         }
         return ResultResponse.success(answerVOList);
     }
@@ -77,15 +87,15 @@ public class AnswerController {
         return ResultResponse.success();
     }
 
-    @PostMapping("/answer/vote/{answerId}")
-    public ResultResponse likedAnswer(@PathVariable("answerId") Long answerId) {
-        answerService.likedAnswer(answerId);
+    @PostMapping("/answer/vote")
+    public ResultResponse likedAnswer(LikeAnswerOrNotRequest likeAnswerOrNotRequest) {
+        answerService.likedAnswer(likeAnswerOrNotRequest.getAnswerId(),likeAnswerOrNotRequest.getUsername());
         return ResultResponse.success();
     }
 
-    @DeleteMapping("/answer/vote/{answerId}")
-    public ResultResponse unlikedAnswer(@PathVariable("answerId") Long answerId) {
-        answerService.unlikedAnswer(answerId);
+    @DeleteMapping("/answer/vote")
+    public ResultResponse unlikedAnswer(LikeAnswerOrNotRequest likeAnswerOrNotRequest) {
+        answerService.unlikedAnswer(likeAnswerOrNotRequest.getAnswerId(),likeAnswerOrNotRequest.getUsername());
         return ResultResponse.success();
     }
 
@@ -103,8 +113,10 @@ public class AnswerController {
 
     @GetMapping("/answer/myCollected")
     public ResultResponse findMyCollectedAnswers(@Valid FindMyOrCollectedAnswersPagesRequest request) {
-        List<Answer> collectedAnswers = answerService.findMyCollectedAnswer(request.getUsername(), request.getPage(), request.getPageSize());
+        List<Answer> collectedAnswers = answerService.findMyCollectedAnswer(request.getUsername(),
+                request.getPage(), request.getPageSize());
         ArrayList<AnswerVO> answerVOList = new ArrayList<>();
+        User requestUser = userService.findUserByUsername(request.getUsername());
         for (Answer answer : collectedAnswers) {
             List<AnswerImage> answerImages = answerImageService.findAnswerImagesByAnswerId(answer.getAnswerId());
             ArrayList<String> answerImagePaths = new ArrayList<>();
@@ -112,7 +124,8 @@ public class AnswerController {
                 answerImagePaths.add(answerImage.getImagePath());
             }
             User userInfo = userService.findUserInfo(answer.getUserId());
-            answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths,userInfo.getNickName()));
+            LikeAnswer likeAnswer = likeAnswerRepository.findByAnswerIdAndUserId(answer.getAnswerId(), requestUser.getUserId());
+            answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths,userInfo.getNickName(),likeAnswer!=null));
         }
         return ResultResponse.success(answerVOList);
     }
@@ -135,7 +148,7 @@ public class AnswerController {
     @GetMapping("/answer/all")
     public ResultResponse findMyCollectedAIAndNormalAnswers(@Valid FindMyCollectedAIAndNormalAnswersPagesRequest request) {
         List<Object> collectedAnswers = answerService.findMyCollectedAIAndNormalAnswers(request.getUsername(), request.getPage(), request.getPageSize());
-
+        User requestUser = userService.findUserByUsername(request.getUsername());
         ArrayList<AIAnswerOrAnswerVO> aiAnswerOrAnswerVOS = new ArrayList<>();
         for (Object obj : collectedAnswers) {
             if (obj instanceof CollectAIAnswer) {
@@ -143,7 +156,8 @@ public class AnswerController {
                 CollectAIAnswer collectAIAnswer = (CollectAIAnswer) obj;
                 AIAnswer aiAnswer = aiAnswerRepository.findById(collectAIAnswer.getAiAnswerId()).orElse(null);
                 if (aiAnswer != null) {
-                    aiAnswerOrAnswerVOS.add(convertAIAnswerToAnswerVO(aiAnswer));
+                    LikeAIAnswer likeAIAnswer = likeAIAnswerRepository.findByAiAnswerIdAndUserId(aiAnswer.getAiAnswerId(), requestUser.getUserId());
+                    aiAnswerOrAnswerVOS.add(convertAIAnswerToAnswerVO(aiAnswer,likeAIAnswer!=null));
                 }
             } else if (obj instanceof CollectAnswer) {
                 // 处理 CollectAnswer 对象
@@ -155,6 +169,7 @@ public class AnswerController {
                     ArrayList<String> answerImagePaths = answerImages.stream()
                             .map(AnswerImage::getImagePath)
                             .collect(Collectors.toCollection(ArrayList::new));
+                    LikeAnswer likeAnswer = likeAnswerRepository.findByAnswerIdAndUserId(answer.getAnswerId(), requestUser.getUserId());
                     aiAnswerOrAnswerVOS.add(
                             AIAnswerOrAnswerVO.builder()
                                     .answerId(answer.getAnswerId())
@@ -168,6 +183,7 @@ public class AnswerController {
                                     .createdAt(answer.getCreatedAt().toString())
                                     .answerImages(answerImagePaths)
                                     .isAIAnswer(false)
+                                    .isLiked(likeAnswer!=null)
                                     .build()
                     );
                 }
@@ -176,7 +192,7 @@ public class AnswerController {
         return ResultResponse.success(aiAnswerOrAnswerVOS);
     }
 
-    private AIAnswerOrAnswerVO convertAIAnswerToAnswerVO(AIAnswer aiAnswer) {
+    private AIAnswerOrAnswerVO convertAIAnswerToAnswerVO(AIAnswer aiAnswer,boolean isLiked) {
         SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
         return AIAnswerOrAnswerVO.builder()
                 .answerId(aiAnswer.getAiAnswerId())
@@ -190,6 +206,7 @@ public class AnswerController {
                 .createdAt(ft.format(aiAnswer.getCreatedAt()))
                 .answerImages(new ArrayList<>())
                 .isAIAnswer(true)
+                .isLiked(isLiked)
                 .build();
     }
 

@@ -35,6 +35,8 @@ public class AnswerServiceImpl implements AnswerService {
     private RedisConstantsConfig redisConstantsConfig;
     @Autowired
     private IssueRepository issueRepository;
+    @Autowired
+    private LikeAnswerRepository likeAnswerRepository;
 
     @Override
     public List<Answer> findAnswerPages(Long issueId, Integer page, Integer pageSize) {
@@ -68,9 +70,12 @@ public class AnswerServiceImpl implements AnswerService {
     }
 
     @Override
-    public void likedAnswer(Long answerId) {
+    @Transactional
+    public void likedAnswer(Long answerId,String username) {
         if (answerRepository.findById(answerId).isPresent()) {
             Answer answer = answerRepository.findById(answerId).get();
+            User user = userService.findUserByUsername(username);
+            likeAnswerRepository.save(LikeAnswer.builder().answerId(answerId).userId(user.getUserId()).build());
             answerRepository.save(answer.setLikedNumber(answer.getLikedNumber() + 1));
         } else {
             throw new BizException(ExceptionEnum.ANSWER_NOT_EXIST);
@@ -78,10 +83,13 @@ public class AnswerServiceImpl implements AnswerService {
     }
 
     @Override
-    public void unlikedAnswer(Long answerId) {
+    @Transactional
+    public void unlikedAnswer(Long answerId,String username) {
         if (answerRepository.findById(answerId).isPresent()) {
             Answer answer = answerRepository.findById(answerId).get();
             if (answer.getLikedNumber() > 0) {
+                User user = userService.findUserByUsername(username);
+                likeAnswerRepository.deleteByAnswerIdAndUserId(answerId, user.getUserId());
                 answer.setLikedNumber(answer.getLikedNumber() - 1);
                 answerRepository.save(answer);
             } else {

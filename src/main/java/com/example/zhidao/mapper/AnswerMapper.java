@@ -16,4 +16,6 @@ public interface AnswerMapper {
     AnswerVO entity2VO(Answer answer, List<String> answerImages);
     @Mapping(target = "createdAt", source = "answer.createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     AnswerVO entity2VO(Answer answer, List<String> answerImages,String nickName);
+    @Mapping(target = "createdAt", source = "answer.createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    AnswerVO entity2VO(Answer answer, List<String> answerImages,String nickName,Boolean isLiked);
 }

@@ -25,4 +25,5 @@ public class AIAnswerOrAnswerVO {
     private String createdAt;
     private List<String> answerImages;
     private boolean isAIAnswer;
+    private boolean isLiked;
 }

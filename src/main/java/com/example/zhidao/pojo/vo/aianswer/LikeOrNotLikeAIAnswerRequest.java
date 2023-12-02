@@ -1,4 +1,4 @@
-package com.example.zhidao.pojo.vo.answer;
+package com.example.zhidao.pojo.vo.aianswer;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,16 +15,11 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @Accessors(chain = true)
 @Builder
-public class FindAnswerPagesRequest {
+public class LikeOrNotLikeAIAnswerRequest {
     @NotNull
     @Size(min = 4, max = 20, message = "用户名长度必须在 4-20 之间")
     @Pattern(regexp = "^[a-zA-Z\\d_]*$", message = "用户名只能包含大小写字母,数字,下划线")
     private String username;
     @NotNull
-    private Long issueId;
-    @NotNull
-    private Integer page;
-    @NotNull
-    private Integer pageSize;
-
+    private Long aiAnswerId;
 }

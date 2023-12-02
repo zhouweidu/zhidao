@@ -9,9 +9,9 @@ public interface AnswerService {
 
     Answer createAnswer(String username, Long issueId, String answerContent);
 
-    void likedAnswer(Long answerId);
+    void likedAnswer(Long answerId,String username);
 
-    void unlikedAnswer(Long answerId);
+    void unlikedAnswer(Long answerId,String username);
 
     void deleteAnswer(Long answerId);
 

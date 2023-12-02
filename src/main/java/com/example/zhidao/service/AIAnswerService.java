@@ -9,9 +9,9 @@ public interface AIAnswerService {
 
     AIAnswer getAIAnswer(Long issueId);
 
-    void likedAIAnswer(Long aiAnswerId);
+    void likedAIAnswer(Long aiAnswerId,String username);
 
-    void unlikedAIAnswer(Long aiAnswerId);
+    void unlikedAIAnswer(Long aiAnswerId,String username);
 
     void collectAIAnswer(String username, Long aiAnswerId);
 

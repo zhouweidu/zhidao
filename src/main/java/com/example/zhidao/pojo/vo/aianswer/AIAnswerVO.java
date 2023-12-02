@@ -22,4 +22,5 @@ public class AIAnswerVO {
     private Integer commentNumber;//评论数
     private Integer collectNumber;//收藏数
     private String createdAt;
+    private Boolean isLiked;
 }

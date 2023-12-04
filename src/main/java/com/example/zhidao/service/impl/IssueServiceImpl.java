@@ -99,4 +99,10 @@ public class IssueServiceImpl implements IssueService {
                 "createdAt"));
         return issueRepository.findByUserId(user.getUserId(), pageable);
     }
+
+    @Override
+    public Issue findById(Long issueId) {
+        return issueRepository.findById(issueId).orElseThrow(
+                () -> new BizException(ExceptionEnum.ISSUE_NOT_EXIST));
+    }
 }

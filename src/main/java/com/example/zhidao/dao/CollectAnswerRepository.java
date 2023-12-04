@@ -12,4 +12,6 @@ public interface CollectAnswerRepository extends JpaRepository<CollectAnswer,Lon
     void deleteByUserIdAndAnswerId(Long userId, Long answerId);
 
     List<CollectAnswer> findByUserId(Long userId, Pageable pageable);
+
+    CollectAnswer findByAnswerIdAndUserId(Long answerId,Long userId);
 }

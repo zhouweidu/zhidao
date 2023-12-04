@@ -1,8 +1,10 @@
 package com.example.zhidao.controller;
 
+import com.example.zhidao.dao.CollectAIAnswerRepository;
 import com.example.zhidao.dao.LikeAIAnswerRepository;
 import com.example.zhidao.mapper.AIAnswerMapper;
 import com.example.zhidao.pojo.entity.AIAnswer;
+import com.example.zhidao.pojo.entity.CollectAIAnswer;
 import com.example.zhidao.pojo.entity.LikeAIAnswer;
 import com.example.zhidao.pojo.entity.User;
 import com.example.zhidao.pojo.vo.aianswer.*;
@@ -25,13 +27,18 @@ public class AIAnswerController {
     private LikeAIAnswerRepository likeAIAnswerRepository;
     @Autowired
     private UserService userService;
+    @Autowired
+    private CollectAIAnswerRepository collectAIAnswerRepository;
 
     @GetMapping("/aiAnswer")
     public ResultResponse getAIAnswer(Long issueId,String username) {
         AIAnswer aiAnswer = aiAnswerService.getAIAnswer(issueId);
         LikeAIAnswer likeAIAnswer = likeAIAnswerRepository.findByAiAnswerIdAndUserId(aiAnswer.getAiAnswerId(),
                 userService.findUserByUsername(username).getUserId());
-        return ResultResponse.success(AIAnswerMapper.INSTANCT.entity2VO(aiAnswer,likeAIAnswer!=null));
+        CollectAIAnswer collectAIAnswer = collectAIAnswerRepository.findByAiAnswerIdAndUserId(aiAnswer.getAiAnswerId(),
+                userService.findUserByUsername(username).getUserId());
+        return ResultResponse.success(AIAnswerMapper.INSTANCT.entity2VO(aiAnswer,likeAIAnswer!=null,
+                collectAIAnswer!=null));
     }
 
     @PostMapping("/aiAnswer/vote")

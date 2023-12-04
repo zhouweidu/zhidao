@@ -40,3 +40,5 @@ redis-constants:
   aiAnswerTTL: 20
   usernameTTL: 10
   userIdTTL: 10
+
+init-data: true

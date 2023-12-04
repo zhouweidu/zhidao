@@ -23,4 +23,5 @@ public class AIAnswerVO {
     private Integer collectNumber;//收藏数
     private String createdAt;
     private Boolean isLiked;
+    private Boolean isCollected;
 }

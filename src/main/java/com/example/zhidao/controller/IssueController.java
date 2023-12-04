@@ -6,11 +6,7 @@ import com.example.zhidao.pojo.entity.Issue;
 import com.example.zhidao.pojo.entity.IssueImage;
 import com.example.zhidao.pojo.entity.User;
 import com.example.zhidao.pojo.vo.common.ResultResponse;
-import com.example.zhidao.pojo.vo.issue.ConcernOrNotRequest;
-import com.example.zhidao.pojo.vo.issue.CreateIssueRequest;
-import com.example.zhidao.pojo.vo.issue.FindIssuePagesRequest;
-import com.example.zhidao.pojo.vo.issue.IssueVO;
-import com.example.zhidao.pojo.vo.issue.FindConcernOrSubmitIssuePagesRequest;
+import com.example.zhidao.pojo.vo.issue.*;
 import com.example.zhidao.service.AIAnswerService;
 import com.example.zhidao.service.IssueImageService;
 import com.example.zhidao.service.IssueService;
@@ -48,6 +44,13 @@ public class IssueController {
                 issue.getIssueTitle() + " " + issue.getIssueContent());
         issueImageService.createIssueImages(issue.getIssueId(), createIssueRequest.getIssueImages());
         return ResultResponse.success(IssueMapper.INSTANCT.entity2VO(issue, aiAnswer));
+    }
+
+    @GetMapping("/issue/{issueId}")
+    public ResultResponse findIssueByIssueId(@PathVariable("issueId") Long issueId){
+        Issue issue = issueService.findById(issueId);
+        User userInfo = userService.findUserInfo(issue.getUserId());
+        return ResultResponse.success(IssueMapper.INSTANCT.entity2VO(issue,null,userInfo.getNickName()));
     }
 
     @GetMapping("/issue/page")

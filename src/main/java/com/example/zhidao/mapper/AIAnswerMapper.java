@@ -15,4 +15,6 @@ public interface AIAnswerMapper {
 
     @Mapping(target = "createdAt", source = "aiAnswer.createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
     AIAnswerVO entity2VO(AIAnswer aiAnswer, Boolean isLiked);
+    @Mapping(target = "createdAt", source = "aiAnswer.createdAt", dateFormat = "yyyy-MM-dd HH:mm:ss")
+    AIAnswerVO entity2VO(AIAnswer aiAnswer, Boolean isLiked,Boolean isCollected);
 }

@@ -16,4 +16,6 @@ public interface IssueService {
     List<Issue> findMyConcernIssue(String username,Integer page,Integer pageSize);
 
     List<Issue> findMyIssue(String username,Integer page,Integer pageSize);
+
+    Issue findById(Long issueId);
 }

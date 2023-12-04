@@ -6,8 +6,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface CollectAIAnswerRepository extends JpaRepository<CollectAIAnswer,Long> {
+public interface CollectAIAnswerRepository extends JpaRepository<CollectAIAnswer, Long> {
     void deleteByUserIdAndAiAnswerId(Long userId, Long aiAnswerId);
 
     List<CollectAIAnswer> findAllByUserId(Long userId, PageRequest pageRequest);
+
+    CollectAIAnswer findByAiAnswerIdAndUserId(Long aiAnswerId, Long userId);
 }

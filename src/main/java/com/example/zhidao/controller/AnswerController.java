@@ -1,9 +1,6 @@
 package com.example.zhidao.controller;
 
-import com.example.zhidao.dao.AIAnswerRepository;
-import com.example.zhidao.dao.AnswerRepository;
-import com.example.zhidao.dao.LikeAIAnswerRepository;
-import com.example.zhidao.dao.LikeAnswerRepository;
+import com.example.zhidao.dao.*;
 import com.example.zhidao.mapper.AIAnswerMapper;
 import com.example.zhidao.mapper.AnswerMapper;
 import com.example.zhidao.pojo.entity.*;
@@ -38,6 +35,8 @@ public class AnswerController {
     @Autowired
     private LikeAIAnswerRepository likeAIAnswerRepository;
     @Autowired
+    private CollectAnswerRepository collectAnswerRepository;
+    @Autowired
     private UserService userService;
 
     @GetMapping("/answer/page")
@@ -57,8 +56,9 @@ public class AnswerController {
             User userInfo = userService.findUserInfo(answer.getUserId());
             LikeAnswer likeAnswer = likeAnswerRepository
                     .findByAnswerIdAndUserId(answer.getAnswerId(), requestUser.getUserId());
+            CollectAnswer collectAnswer = collectAnswerRepository.findByAnswerIdAndUserId(answer.getAnswerId(), requestUser.getUserId());
             answerVOList.add(AnswerMapper.INSTANCT.entity2VO(answer, answerImagePaths,userInfo.getNickName(),
-                    likeAnswer != null));
+                    likeAnswer != null,collectAnswer!=null));
         }
         return ResultResponse.success(answerVOList);
     }

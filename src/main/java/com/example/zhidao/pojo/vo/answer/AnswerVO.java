@@ -25,4 +25,5 @@ public class AnswerVO {
     private String createdAt;
     private List<String> answerImages;
     private Boolean isLiked;
+    private Boolean isCollected;
 }

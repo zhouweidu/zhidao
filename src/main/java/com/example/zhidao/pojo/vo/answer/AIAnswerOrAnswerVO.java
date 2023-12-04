@@ -24,6 +24,7 @@ public class AIAnswerOrAnswerVO {
     private Integer collectNumber;//收藏数
     private String createdAt;
     private List<String> answerImages;
-    private boolean isAIAnswer;
-    private boolean isLiked;
+    private Boolean isAIAnswer;
+    private Boolean isLiked;
+    private Boolean isCollected;
 }

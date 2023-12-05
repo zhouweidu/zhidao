@@ -13,6 +13,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -23,6 +24,7 @@ import org.springframework.core.io.ClassPathResource;
 import java.io.InputStream;
 import java.util.List;
 
+@Slf4j
 @SpringBootApplication
 public class ZhidaoApplication {
     @Value("${init-data}")
@@ -42,12 +44,15 @@ public class ZhidaoApplication {
             @Override
             public void run(String... args) throws Exception {
                 if (!enableInitData){
+                    log.info("init data disabled");
                     return;
                 }
                 List<Issue> issuePages = issueService.findIssuePages(0, 1);
                 if (issuePages != null && issuePages.size() != 0) {
+                    log.info("init data already exist");
                     return;
                 }
+                log.info("init data start");
                 ClassPathResource classPathResource = new ClassPathResource("init_data.json");
                 InputStream inputStream = classPathResource.getInputStream();
                 byte[] bytes = new byte[0];
@@ -55,12 +60,9 @@ public class ZhidaoApplication {
                 inputStream.read(bytes);
                 String jsonStr = new String(bytes);
                 JSONArray jsonArray = JSONArray.parseArray(jsonStr);
-                System.out.println("-------");
-                System.out.println(jsonArray);
-                System.out.println("-------");
                 for (int i = 0; i < jsonArray.size(); i++) {
                     DataInit dataInit = JSONObject.toJavaObject(jsonArray.getJSONObject(i), DataInit.class);
-                    System.out.println(dataInit);
+                    log.info(dataInit.toString());
                     String usernameSubmit = RandomUtil.randomString(RandomUtil.randomInt(4, 20));
                     String passwordSubmit=RandomUtil.randomString(UPPER_CHAR,4)+
                             RandomUtil.randomString(LOWER_CHAR,6)+RandomUtil.randomString(NUMBER_CHAR,6);

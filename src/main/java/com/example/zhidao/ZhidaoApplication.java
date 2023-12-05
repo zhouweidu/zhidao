@@ -61,15 +61,20 @@ public class ZhidaoApplication {
                 for (int i = 0; i < jsonArray.size(); i++) {
                     DataInit dataInit = JSONObject.toJavaObject(jsonArray.getJSONObject(i), DataInit.class);
                     System.out.println(dataInit);
-                    String username = RandomUtil.randomString(RandomUtil.randomInt(4, 20));
-                    String password=RandomUtil.randomString(UPPER_CHAR,4)+
+                    String usernameSubmit = RandomUtil.randomString(RandomUtil.randomInt(4, 20));
+                    String passwordSubmit=RandomUtil.randomString(UPPER_CHAR,4)+
                             RandomUtil.randomString(LOWER_CHAR,6)+RandomUtil.randomString(NUMBER_CHAR,6);
-                    String nickName=RandomUtil.randomString(RandomUtil.randomInt(6,16));
-                    userService.register(username, password, nickName, null);
-                    Issue issue = issueService.createIssue(username, dataInit.issueTitle, dataInit.issueContent);
+                    String nickNameSubmit=RandomUtil.randomString(RandomUtil.randomInt(6,16));
+                    userService.register(usernameSubmit, passwordSubmit, nickNameSubmit, null);
+                    Issue issue = issueService.createIssue(usernameSubmit, dataInit.issueTitle, dataInit.issueContent);
                     aiAnswerService.createAIAnswer(issue.getIssueId(),
                             issue.getIssueTitle() + " " + issue.getIssueContent());
                     for (int j = 0; j < dataInit.getAnswerContent().size(); j++) {
+                        String username = RandomUtil.randomString(RandomUtil.randomInt(4, 20));
+                        String password=RandomUtil.randomString(UPPER_CHAR,4)+
+                                RandomUtil.randomString(LOWER_CHAR,6)+RandomUtil.randomString(NUMBER_CHAR,6);
+                        String nickName=RandomUtil.randomString(RandomUtil.randomInt(6,16));
+                        userService.register(username, password, nickName, null);
                         answerService.createAnswer(username,issue.getIssueId(),dataInit.getAnswerContent().get(j));
                     }
                 }

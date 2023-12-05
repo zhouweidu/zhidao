@@ -41,4 +41,4 @@ redis-constants:
   usernameTTL: 10
   userIdTTL: 10
 
-init-data: true
+init-data: false

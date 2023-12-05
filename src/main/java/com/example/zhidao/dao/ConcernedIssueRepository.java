@@ -9,4 +9,6 @@ public interface ConcernedIssueRepository extends JpaRepository<ConcernedIssue,L
     void deleteByUserIdAndIssueId(Long userId, Long issueId);
 
     Page<ConcernedIssue> findByUserId(Long userId, Pageable pageable);
+
+    ConcernedIssue findByUserIdAndIssueId(Long userId, Long issueId);
 }

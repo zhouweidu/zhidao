@@ -1,10 +1,8 @@
 package com.example.zhidao.controller;
 
+import com.example.zhidao.dao.ConcernedIssueRepository;
 import com.example.zhidao.mapper.IssueMapper;
-import com.example.zhidao.pojo.entity.AIAnswer;
-import com.example.zhidao.pojo.entity.Issue;
-import com.example.zhidao.pojo.entity.IssueImage;
-import com.example.zhidao.pojo.entity.User;
+import com.example.zhidao.pojo.entity.*;
 import com.example.zhidao.pojo.vo.common.ResultResponse;
 import com.example.zhidao.pojo.vo.issue.*;
 import com.example.zhidao.service.AIAnswerService;
@@ -32,6 +30,9 @@ public class IssueController {
     private IssueImageService issueImageService;
 
     @Autowired
+    private ConcernedIssueRepository concernedIssueRepository;
+
+    @Autowired
     private UserService userService;
 
     @PostMapping("/issue")
@@ -46,17 +47,21 @@ public class IssueController {
         return ResultResponse.success(IssueMapper.INSTANCT.entity2VO(issue, aiAnswer));
     }
 
-    @GetMapping("/issue/{issueId}")
-    public ResultResponse findIssueByIssueId(@PathVariable("issueId") Long issueId){
+    @GetMapping("/issue")
+    public ResultResponse findIssueByIssueId(Long issueId,String username){
         Issue issue = issueService.findById(issueId);
         User userInfo = userService.findUserInfo(issue.getUserId());
-        return ResultResponse.success(IssueMapper.INSTANCT.entity2VO(issue,null,userInfo.getNickName()));
+        ConcernedIssue concernedIssue = concernedIssueRepository.findByUserIdAndIssueId(
+                userService.findUserByUsername(username).getUserId(), issueId);
+        return ResultResponse.success(IssueMapper.INSTANCT.entity2VO(issue,null,userInfo.getNickName(),
+                concernedIssue != null));
     }
 
     @GetMapping("/issue/page")
     public ResultResponse findIssuePages(@Valid FindIssuePagesRequest findIssuePagesRequest) {
         List<Issue> issuePages = issueService.findIssuePages(findIssuePagesRequest.getPage(),
                 findIssuePagesRequest.getPageSize());
+        User requestUser = userService.findUserByUsername(findIssuePagesRequest.getUsername());
         ArrayList<IssueVO> issueVOList = new ArrayList<>();
         for (Issue issuePage : issuePages) {
             List<IssueImage> issueImages = issueImageService.findIssueImagesByIssueId(issuePage.getIssueId());
@@ -67,7 +72,10 @@ public class IssueController {
                 }
             }
             User userInfo = userService.findUserInfo(issuePage.getUserId());
-            issueVOList.add(IssueMapper.INSTANCT.entity2VO(issuePage, issueImagePaths,userInfo.getNickName()));
+            ConcernedIssue concernedIssue = concernedIssueRepository.findByUserIdAndIssueId(
+                    requestUser.getUserId(), issuePage.getIssueId());
+            issueVOList.add(IssueMapper.INSTANCT.entity2VO(issuePage, issueImagePaths,userInfo.getNickName(),
+                    concernedIssue!= null));
         }
         return ResultResponse.success(issueVOList);
     }
@@ -107,6 +115,7 @@ public class IssueController {
     public ResultResponse findMyIssue(@Valid FindConcernOrSubmitIssuePagesRequest request) {
         List<Issue> myIssues = issueService.findMyIssue(
                 request.getUsername(), request.getPage(), request.getPageSize());
+        User requestUser = userService.findUserByUsername(request.getUsername());
         ArrayList<IssueVO> issueVOList = new ArrayList<>();
         for (Issue myIssue : myIssues) {
             List<IssueImage> issueImages = issueImageService.findIssueImagesByIssueId(myIssue.getIssueId());
@@ -116,7 +125,10 @@ public class IssueController {
                     issueImagePaths.add(issueImage.getImagePath());
                 }
             }
-            issueVOList.add(IssueMapper.INSTANCT.entity2VO(myIssue, issueImagePaths));
+            ConcernedIssue concernedIssue = concernedIssueRepository.findByUserIdAndIssueId(
+                    requestUser.getUserId(), myIssue.getIssueId());
+            issueVOList.add(IssueMapper.INSTANCT.entity2VO(myIssue, issueImagePaths,requestUser.getNickName(),
+                    concernedIssue != null));
         }
         return ResultResponse.success(issueVOList);
     }

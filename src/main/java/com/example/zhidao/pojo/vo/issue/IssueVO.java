@@ -23,4 +23,5 @@ public class IssueVO {
     private Integer answerNumber;//回答数
     private String createdAt;
     private List<String> issueImages;
+    private Boolean isConcerned;
 }

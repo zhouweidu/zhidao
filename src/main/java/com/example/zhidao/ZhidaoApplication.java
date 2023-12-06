@@ -3,7 +3,9 @@ package com.example.zhidao;
 import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.example.zhidao.pojo.entity.Answer;
 import com.example.zhidao.pojo.entity.Issue;
+import com.example.zhidao.pojo.entity.User;
 import com.example.zhidao.service.AIAnswerService;
 import com.example.zhidao.service.AnswerService;
 import com.example.zhidao.service.IssueService;
@@ -29,9 +31,9 @@ import java.util.List;
 public class ZhidaoApplication {
     @Value("${init-data}")
     private boolean enableInitData;
-    private final String LOWER_CHAR="abcdefghijklmnopqrstuvwxyz";
-    private final String UPPER_CHAR="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private final String NUMBER_CHAR="0123456789";
+    private final String LOWER_CHAR = "abcdefghijklmnopqrstuvwxyz";
+    private final String UPPER_CHAR = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private final String NUMBER_CHAR = "0123456789";
 
     public static void main(String[] args) {
         SpringApplication.run(ZhidaoApplication.class, args);
@@ -43,7 +45,7 @@ public class ZhidaoApplication {
         return new CommandLineRunner() {
             @Override
             public void run(String... args) throws Exception {
-                if (!enableInitData){
+                if (!enableInitData) {
                     log.info("init data disabled");
                     return;
                 }
@@ -63,26 +65,32 @@ public class ZhidaoApplication {
                 for (int i = 0; i < jsonArray.size(); i++) {
                     DataInit dataInit = JSONObject.toJavaObject(jsonArray.getJSONObject(i), DataInit.class);
                     log.info(dataInit.toString());
-                    String usernameSubmit = RandomUtil.randomString(RandomUtil.randomInt(4, 20));
-                    String passwordSubmit=RandomUtil.randomString(UPPER_CHAR,4)+
-                            RandomUtil.randomString(LOWER_CHAR,6)+RandomUtil.randomString(NUMBER_CHAR,6);
-                    String nickNameSubmit=RandomUtil.randomString(RandomUtil.randomInt(6,16));
-                    userService.register(usernameSubmit, passwordSubmit, nickNameSubmit, null);
-                    Issue issue = issueService.createIssue(usernameSubmit, dataInit.issueTitle, dataInit.issueContent);
+                    User userSubmit = getUser(userService);
+                    Issue issue = issueService.createIssue(userSubmit.getUsername(), dataInit.issueTitle, dataInit.issueContent);
                     aiAnswerService.createAIAnswer(issue.getIssueId(),
                             issue.getIssueTitle() + " " + issue.getIssueContent());
                     for (int j = 0; j < dataInit.getAnswerContent().size(); j++) {
-                        String username = RandomUtil.randomString(RandomUtil.randomInt(4, 20));
-                        String password=RandomUtil.randomString(UPPER_CHAR,4)+
-                                RandomUtil.randomString(LOWER_CHAR,6)+RandomUtil.randomString(NUMBER_CHAR,6);
-                        String nickName=RandomUtil.randomString(RandomUtil.randomInt(6,16));
-                        userService.register(username, password, nickName, null);
-                        answerService.createAnswer(username,issue.getIssueId(),dataInit.getAnswerContent().get(j));
+                        User userAnswer = getUser(userService);
+                        Answer answer = answerService.createAnswer(userAnswer.getUsername(), issue.getIssueId(),
+                                dataInit.getAnswerContent().get(j));
+                        if (RandomUtil.randomInt(0, 10) < 4) {
+                            for (int k = 0; k < RandomUtil.randomInt(0, 8); k++) {
+                                User userLike = getUser(userService);
+                                answerService.likedAnswer(answer.getAnswerId(), userLike.getUsername());
+                            }
+                        }
                     }
                 }
-
             }
         };
+    }
+
+    private User getUser(UserService userService) {
+        String username = RandomUtil.randomString(RandomUtil.randomInt(4, 20));
+        String password = RandomUtil.randomString(UPPER_CHAR, 4) +
+                RandomUtil.randomString(LOWER_CHAR, 6) + RandomUtil.randomString(NUMBER_CHAR, 6);
+        String nickName = RandomUtil.randomString(RandomUtil.randomInt(6, 16));
+        return userService.register(username, password, nickName, null);
     }
 
     @Data

@@ -106,7 +106,8 @@ public class IssueController {
                 }
             }
             User userInfo = userService.findUserInfo(concernIssue.getUserId());
-            issueVOList.add(IssueMapper.INSTANCT.entity2VO(concernIssue, issueImagePaths,userInfo.getNickName()));
+            issueVOList.add(IssueMapper.INSTANCT.entity2VO(concernIssue, issueImagePaths,
+                    userInfo.getNickName(),true));
         }
         return ResultResponse.success(issueVOList);
     }

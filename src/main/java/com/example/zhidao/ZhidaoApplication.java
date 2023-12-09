@@ -1,8 +1,11 @@
 package com.example.zhidao;
 
+import cn.hutool.core.io.IoUtil;
+import cn.hutool.core.io.file.FileReader;
 import cn.hutool.core.util.RandomUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.util.IOUtils;
 import com.example.zhidao.pojo.entity.Answer;
 import com.example.zhidao.pojo.entity.Issue;
 import com.example.zhidao.pojo.entity.User;
@@ -25,6 +28,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.TimeZone;
 
 @Slf4j
 @SpringBootApplication
@@ -36,6 +40,7 @@ public class ZhidaoApplication {
     private final String NUMBER_CHAR = "0123456789";
 
     public static void main(String[] args) {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
         SpringApplication.run(ZhidaoApplication.class, args);
     }
 
@@ -55,13 +60,8 @@ public class ZhidaoApplication {
                     return;
                 }
                 log.info("init data start");
-                ClassPathResource classPathResource = new ClassPathResource("init_data.json");
-                InputStream inputStream = classPathResource.getInputStream();
-                byte[] bytes = new byte[0];
-                bytes = new byte[inputStream.available()];
-                inputStream.read(bytes);
-                String jsonStr = new String(bytes);
-                JSONArray jsonArray = JSONArray.parseArray(jsonStr);
+                InputStream inputStream = new ClassPathResource("init_data.json").getInputStream();
+                JSONArray jsonArray = JSONArray.parseArray(IoUtil.readUtf8(inputStream));
                 for (int i = 0; i < jsonArray.size(); i++) {
                     DataInit dataInit = JSONObject.toJavaObject(jsonArray.getJSONObject(i), DataInit.class);
                     log.info(dataInit.toString());
@@ -74,13 +74,14 @@ public class ZhidaoApplication {
                         Answer answer = answerService.createAnswer(userAnswer.getUsername(), issue.getIssueId(),
                                 dataInit.getAnswerContent().get(j));
                         if (RandomUtil.randomInt(0, 10) < 4) {
-                            for (int k = 0; k < RandomUtil.randomInt(0, 8); k++) {
+                            for (int k = 0; k < RandomUtil.randomInt(1, 8); k++) {
                                 User userLike = getUser(userService);
                                 answerService.likedAnswer(answer.getAnswerId(), userLike.getUsername());
                             }
                         }
                     }
                 }
+                log.info("init data end");
             }
         };
     }
